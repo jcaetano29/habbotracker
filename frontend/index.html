@@ -5,217 +5,554 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
 <title>HabboTracker 🍄 by Fungi</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Volkhov:ital,wght@0,400;0,700;1,400&family=Ubuntu+Mono:wght@400;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;500;700&family=Ubuntu+Condensed&display=swap" rel="stylesheet">
 <style>
+/* ══════════════════════════════════════════════
+   Paleta extraída de Habbo.es
+   Header:   #1f4d73  (azul petróleo oscuro)
+   Nav:      #2a6496  (azul medio)
+   Accent:   #3b9fd4  (azul cielo)
+   BG page:  #e8eff5  (gris azulado claro)
+   BG card:  #ffffff
+   Border:   #c5d8e8
+   Yellow:   #f9c000  (logo Habbo)
+   Green:    #5cb85c  (CTA jugar)
+   Text:     #2d3f50
+   Text2:    #5a7a96
+   Red:      #d9534f
+   ══════════════════════════════════════════════ */
 :root {
-  --bg0:       #0d1117;
-  --bg1:       #161b22;
-  --bg2:       #1c2333;
-  --bg3:       #21262d;
-  --border:    #30363d;
-  --border2:   #444c56;
-  --gold:      #f0c040;
-  --gold2:     #d4a017;
-  --gold-dim:  rgba(240,192,64,.14);
-  --gold-glow: 0 0 18px rgba(240,192,64,.35);
-  --teal:      #4cc9b0;
-  --teal-dim:  rgba(76,201,176,.12);
-  --pink:      #e06c9f;
-  --pink-dim:  rgba(224,108,159,.12);
-  --red:       #e05252;
-  --red-dim:   rgba(224,82,82,.12);
-  --green:     #56d364;
-  --green-dim: rgba(86,211,100,.12);
-  --text:      #e6edf3;
-  --text2:     #8b949e;
-  --text3:     #6e7681;
-  --r:         6px;
-  --rl:        12px;
-  --sans:      'Nunito', sans-serif;
-  --mono:      'Ubuntu Mono', monospace;
-  --disp:      'Volkhov', serif;
+  --hdr:      #1f4d73;
+  --nav:      #2a6496;
+  --nav2:     #1f4d73;
+  --accent:   #3b9fd4;
+  --accent2:  #2e86b5;
+  --yellow:   #f9c000;
+  --yellow2:  #e0a800;
+  --green:    #5cb85c;
+  --red:      #d9534f;
+  --red-bg:   #fdf1f0;
+  --red-b:    #f5c6c5;
+  --page:     #dde8f0;
+  --card:     #ffffff;
+  --card2:    #f0f6fb;
+  --border:   #c5d8e8;
+  --border2:  #a8c4d8;
+  --text:     #2d3f50;
+  --text2:    #5a7a96;
+  --text3:    #8aaabb;
+  --shadow:   0 2px 8px rgba(31,77,115,.12);
+  --shadow-lg:0 4px 20px rgba(31,77,115,.18);
+  --r:        4px;
+  --rl:       8px;
+  --sans:     'Ubuntu', sans-serif;
+  --cond:     'Ubuntu Condensed', sans-serif;
 }
+
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
-body{font-family:var(--sans);background:var(--bg0);color:var(--text);min-height:100vh;font-size:14px;line-height:1.5;overflow-x:hidden}
-::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:var(--bg1)}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
-.app{display:flex;flex-direction:column;min-height:100vh;max-width:780px;margin:0 auto}
+body{font-family:var(--sans);background:var(--page);color:var(--text);min-height:100vh;font-size:14px;line-height:1.5}
 
-/* HEADER */
-.header{position:sticky;top:0;z-index:100;height:58px;background:rgba(13,17,23,.93);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 20px}
-.logo{font-family:var(--disp);font-size:22px;color:var(--gold);text-shadow:var(--gold-glow);letter-spacing:.5px;display:flex;align-items:center;gap:8px;user-select:none}
-.logo-dot{width:8px;height:8px;border-radius:50%;background:var(--gold);box-shadow:var(--gold-glow);animation:pdot 2.5s ease-in-out infinite}
-@keyframes pdot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.7)}}
-.logo-sub{font-family:var(--mono);font-size:10px;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;margin-top:2px}
-.status-badge{font-family:var(--mono);font-size:11px;padding:4px 10px;border-radius:20px;border:1px solid;display:flex;align-items:center;gap:6px;transition:all .3s}
-.status-badge.ok{color:var(--green);border-color:var(--green);background:var(--green-dim)}
-.status-badge.err{color:var(--red);border-color:var(--red);background:var(--red-dim)}
-.status-badge.wait{color:var(--text3);border-color:var(--border);background:transparent}
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:var(--page)}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+
+.app{display:flex;flex-direction:column;min-height:100vh;max-width:860px;margin:0 auto}
+
+/* ── HEADER ── */
+.header{
+  background:var(--hdr);
+  padding:0 20px;
+  height:56px;
+  display:flex;align-items:center;justify-content:space-between;
+  box-shadow:0 2px 6px rgba(0,0,0,.25);
+  position:sticky;top:0;z-index:100;
+}
+.logo{
+  font-family:var(--cond);
+  font-size:24px;
+  font-weight:700;
+  color:var(--yellow);
+  letter-spacing:.5px;
+  text-shadow:0 1px 3px rgba(0,0,0,.3);
+  display:flex;align-items:center;gap:10px;
+  user-select:none;
+}
+.logo-icon{
+  width:32px;height:32px;
+  background:var(--yellow);
+  border-radius:var(--r);
+  display:flex;align-items:center;justify-content:center;
+  font-size:16px;
+  box-shadow:0 2px 4px rgba(0,0,0,.2);
+}
+.logo-sub{
+  font-family:var(--sans);
+  font-size:10px;
+  font-weight:400;
+  color:rgba(255,255,255,.55);
+  letter-spacing:.5px;
+  margin-top:2px;
+}
+.status-pill{
+  display:flex;align-items:center;gap:6px;
+  padding:5px 12px;
+  border-radius:20px;
+  font-size:11px;
+  font-weight:700;
+  letter-spacing:.5px;
+  text-transform:uppercase;
+  border:1px solid rgba(255,255,255,.2);
+  color:rgba(255,255,255,.7);
+  background:rgba(0,0,0,.2);
+  transition:all .3s;
+}
+.status-pill.ok{color:#7ddd7d;border-color:rgba(125,221,125,.4);background:rgba(92,184,92,.15)}
+.status-pill.err{color:#ff9090;border-color:rgba(255,144,144,.4);background:rgba(217,83,79,.15)}
 .status-dot{width:6px;height:6px;border-radius:50%;background:currentColor}
-.status-badge.ok .status-dot{animation:pdot 2s infinite}
+.status-pill.ok .status-dot{animation:blink 2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
 
-/* NAV */
-.nav{display:flex;background:var(--bg1);border-bottom:1px solid var(--border);overflow-x:auto;scrollbar-width:none;position:sticky;top:58px;z-index:99}
+/* ── NAV ── */
+.nav{
+  background:var(--nav);
+  display:flex;
+  overflow-x:auto;
+  scrollbar-width:none;
+  position:sticky;top:56px;z-index:99;
+  box-shadow:0 2px 4px rgba(0,0,0,.15);
+}
 .nav::-webkit-scrollbar{display:none}
-.tab{flex:1;min-width:max-content;padding:0 16px;height:44px;font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text3);background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;transition:all .2s;white-space:nowrap}
-.tab:hover{color:var(--text);background:var(--bg2)}
-.tab.active{color:var(--gold);border-bottom-color:var(--gold);background:var(--gold-dim)}
+.tab{
+  flex:1;min-width:max-content;
+  height:42px;padding:0 20px;
+  font-family:var(--cond);
+  font-size:13px;font-weight:700;
+  letter-spacing:.5px;text-transform:uppercase;
+  color:rgba(255,255,255,.7);
+  background:none;border:none;
+  border-bottom:3px solid transparent;
+  cursor:pointer;transition:all .2s;
+  white-space:nowrap;
+}
+.tab:hover{color:#fff;background:rgba(255,255,255,.08)}
+.tab.active{
+  color:#fff;
+  border-bottom-color:var(--yellow);
+  background:rgba(255,255,255,.12);
+}
 
-/* CONTENT */
-.content{flex:1;padding:24px 20px 40px}
-.screen{animation:fadeUp .25s ease both}
-@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+/* ── CONTENT ── */
+.content{flex:1;padding:20px;display:flex;flex-direction:column;gap:16px}
+.screen{animation:up .2s ease both}
+@keyframes up{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
 
-/* COMPONENTS */
-.section-title{font-family:var(--disp);font-size:20px;color:var(--gold);margin-bottom:20px;display:flex;align-items:center;gap:10px}
-.section-title::after{content:'';flex:1;height:1px;background:linear-gradient(to right,var(--gold2),transparent)}
-.card{background:var(--bg1);border:1px solid var(--border);border-radius:var(--rl);padding:16px;transition:border-color .2s}
-.card:hover{border-color:var(--border2)}
-.btn{font-family:var(--sans);font-weight:700;font-size:13px;padding:8px 18px;border-radius:var(--r);border:1px solid;cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;gap:6px}
-.btn-primary{background:var(--gold);color:#0d1117;border-color:var(--gold)}
-.btn-primary:hover{background:var(--gold2);border-color:var(--gold2);transform:translateY(-1px)}
-.btn-secondary{background:transparent;color:var(--text2);border-color:var(--border)}
-.btn-secondary:hover{border-color:var(--border2);color:var(--text)}
-.btn-ghost{background:transparent;color:var(--text3);border-color:transparent;padding:6px 10px}
-.btn-ghost:hover{color:var(--text);background:var(--bg3)}
-.btn:disabled{opacity:.4;cursor:not-allowed;transform:none!important}
-.input{width:100%;background:var(--bg0);border:1px solid var(--border);border-radius:var(--r);color:var(--text);font-family:var(--sans);font-size:14px;padding:9px 12px;transition:border-color .2s,box-shadow .2s;outline:none}
-.input:focus{border-color:var(--gold);box-shadow:0 0 0 3px var(--gold-dim)}
+/* ── CARDS ── */
+.card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:var(--rl);
+  box-shadow:var(--shadow);
+}
+.card-header{
+  background:linear-gradient(135deg,var(--nav) 0%,var(--accent2) 100%);
+  color:#fff;
+  padding:12px 16px;
+  border-radius:var(--rl) var(--rl) 0 0;
+  font-family:var(--cond);
+  font-size:14px;font-weight:700;
+  letter-spacing:.5px;text-transform:uppercase;
+  display:flex;align-items:center;gap:8px;
+}
+.card-body{padding:16px}
+
+/* ── BUTTONS ── */
+.btn{
+  font-family:var(--sans);font-weight:700;font-size:13px;
+  padding:8px 18px;border-radius:var(--r);border:1px solid;
+  cursor:pointer;transition:all .15s;
+  display:inline-flex;align-items:center;gap:6px;
+  text-decoration:none;
+}
+.btn-blue{background:var(--accent);color:#fff;border-color:var(--accent2)}
+.btn-blue:hover{background:var(--accent2);border-color:#1f6b94;transform:translateY(-1px);box-shadow:0 3px 8px rgba(59,159,212,.35)}
+.btn-yellow{background:var(--yellow);color:#2d3f50;border-color:var(--yellow2)}
+.btn-yellow:hover{background:var(--yellow2);transform:translateY(-1px);box-shadow:0 3px 8px rgba(249,192,0,.35)}
+.btn-outline{background:#fff;color:var(--accent);border-color:var(--border2)}
+.btn-outline:hover{background:var(--card2);border-color:var(--accent)}
+.btn-ghost{background:transparent;color:var(--text2);border-color:transparent;padding:6px 10px}
+.btn-ghost:hover{background:var(--card2);color:var(--text)}
+.btn-red{background:var(--red);color:#fff;border-color:#c9302c}
+.btn-red:hover{background:#c9302c;transform:translateY(-1px)}
+.btn:disabled{opacity:.45;cursor:not-allowed;transform:none!important;box-shadow:none!important}
+.btn-sm{padding:5px 12px;font-size:12px}
+
+/* ── INPUTS ── */
+.input{
+  width:100%;
+  background:#fff;
+  border:1px solid var(--border2);
+  border-radius:var(--r);
+  color:var(--text);
+  font-family:var(--sans);font-size:14px;
+  padding:9px 12px;
+  transition:border-color .2s,box-shadow .2s;outline:none;
+}
+.input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(59,159,212,.2)}
 .input::placeholder{color:var(--text3)}
-textarea.input{resize:vertical;min-height:90px}
-.label{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.8px;text-transform:uppercase;color:var(--text3);margin-bottom:6px}
+textarea.input{resize:vertical;min-height:88px}
+.label{
+  display:block;
+  font-size:12px;font-weight:700;
+  color:var(--text2);
+  margin-bottom:5px;
+  text-transform:uppercase;letter-spacing:.4px;
+}
 .form-group{margin-bottom:14px}
-.err-box{background:var(--red-dim);border:1px solid var(--red);border-radius:var(--r);padding:10px 14px;color:var(--red);font-size:13px;margin-bottom:12px}
-.tag{display:inline-flex;align-items:center;gap:4px;font-family:var(--mono);font-size:10px;letter-spacing:.5px;text-transform:uppercase;padding:2px 8px;border-radius:20px;border:1px solid}
-.tag-gold{color:var(--gold);border-color:var(--gold2);background:var(--gold-dim)}
-.tag-teal{color:var(--teal);border-color:var(--teal);background:var(--teal-dim)}
-.tag-pink{color:var(--pink);border-color:var(--pink);background:var(--pink-dim)}
-.spinner{width:20px;height:20px;border:2px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto}
+.err-box{
+  background:var(--red-bg);border:1px solid var(--red-b);
+  border-radius:var(--r);padding:10px 14px;
+  color:var(--red);font-size:13px;margin-bottom:12px;
+}
+.info-box{
+  background:#f0f8ff;border:1px solid #bee3f8;
+  border-radius:var(--r);padding:10px 14px;
+  color:#2e6da4;font-size:13px;
+}
+
+/* badges */
+.badge-pill{
+  display:inline-flex;align-items:center;gap:4px;
+  font-size:11px;font-weight:700;
+  padding:3px 10px;border-radius:20px;
+  border:1px solid;letter-spacing:.3px;
+}
+.badge-blue{color:var(--accent2);border-color:var(--border2);background:var(--card2)}
+.badge-yellow{color:#856404;border-color:#ffe699;background:#fff9e0}
+.badge-green{color:#285f28;border-color:#c3e6c3;background:#f0faf0}
+.badge-red{color:#9b2222;border-color:#f5c6c5;background:var(--red-bg)}
+
+/* spinner */
+.spinner{width:20px;height:20px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto}
 @keyframes spin{to{transform:rotate(360deg)}}
-.loading-center{display:flex;justify-content:center;padding:40px 0}
+.loading-center{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:48px 0;gap:12px;color:var(--text3);font-size:13px}
+.loading-center .spinner{width:28px;height:28px;border-width:3px}
+
 .empty-state{text-align:center;padding:48px 20px;color:var(--text3)}
-.empty-state .emoji{font-size:36px;margin-bottom:12px}
-.sort-btn{font-family:var(--mono);font-size:11px;letter-spacing:.5px;padding:5px 12px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--text3);cursor:pointer;transition:all .2s}
-.sort-btn.active{color:var(--gold);border-color:var(--gold);background:var(--gold-dim)}
-.sort-btn:hover:not(.active){border-color:var(--border2);color:var(--text)}
+.empty-state .emoji{font-size:40px;margin-bottom:12px}
+.empty-state p{font-size:14px;line-height:1.6}
 
-/* HOME */
-.home-hero{text-align:center;padding:40px 0 32px}
-.home-hero h1{font-family:var(--disp);font-size:38px;color:var(--gold);text-shadow:var(--gold-glow);line-height:1.1;margin-bottom:8px}
-.home-hero p{color:var(--text2);font-size:14px}
-.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:28px 0}
-.stat-card{background:var(--bg1);border:1px solid var(--border);border-radius:var(--rl);padding:16px;text-align:center}
-.stat-num{font-family:var(--disp);font-size:28px;color:var(--gold);line-height:1;margin-bottom:4px}
-.stat-label{font-family:var(--mono);font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--text3)}
-.top-item{display:flex;align-items:center;gap:10px;padding:8px 10px;cursor:pointer;transition:background .15s;border-radius:var(--r);margin:0 -10px}
-.top-item:hover{background:var(--bg2)}
-.top-rank{font-family:var(--mono);font-size:11px;color:var(--text3);width:24px;text-align:center}
-.top-rank.gold{color:var(--gold);font-weight:700}
-.top-rank.silver{color:#c0c0c0}
-.top-rank.bronze{color:#cd7f32}
-.top-name{flex:1;font-weight:700;font-size:13px}
-.top-count{font-family:var(--mono);font-size:12px;color:var(--red)}
-.home-cta{display:flex;gap:10px;margin-top:28px;justify-content:center}
+/* ══════════════════════════════════════════════
+   HOME
+   ══════════════════════════════════════════════ */
+.home-hero{
+  background:linear-gradient(135deg,var(--hdr) 0%,var(--accent2) 100%);
+  border-radius:var(--rl);
+  padding:32px 24px;
+  color:#fff;
+  box-shadow:var(--shadow-lg);
+  text-align:center;
+  position:relative;
+  overflow:hidden;
+}
+.home-hero::before{
+  content:'';
+  position:absolute;inset:0;
+  background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+.home-hero h1{
+  font-family:var(--cond);font-size:36px;font-weight:700;
+  color:var(--yellow);text-shadow:0 2px 6px rgba(0,0,0,.3);
+  margin-bottom:6px;position:relative;
+}
+.home-hero p{color:rgba(255,255,255,.8);font-size:14px;position:relative}
+.home-cta{display:flex;gap:10px;justify-content:center;margin-top:20px;position:relative;flex-wrap:wrap}
 
-/* PROFILE */
-.search-bar{display:flex;gap:8px;margin-bottom:24px}
-.search-bar .input{flex:1}
-.profile-card{display:grid;grid-template-columns:auto 1fr;gap:16px;margin-bottom:20px}
-.avatar-wrap{width:90px;height:120px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;display:flex;align-items:flex-end;justify-content:center;flex-shrink:0}
-.avatar-wrap img{max-width:100%;max-height:100%;image-rendering:pixelated}
-.profile-info{display:flex;flex-direction:column;justify-content:center;gap:6px}
-.profile-name{font-family:var(--disp);font-size:22px;color:var(--text);line-height:1}
-.profile-motto{font-style:italic;color:var(--text2);font-size:13px}
-.profile-meta{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
-.badges-grid{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
-.badge-item{width:50px;height:50px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);display:flex;align-items:center;justify-content:center;overflow:hidden;cursor:default;transition:border-color .2s,transform .15s}
-.badge-item:hover{border-color:var(--gold);transform:scale(1.1);z-index:1}
-.badge-item img{width:40px;height:40px;image-rendering:pixelated}
-.badge-empty{font-size:9px;color:var(--text3);text-align:center;padding:2px;word-break:break-all}
-.friends-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-top:12px}
-.friend-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:10px;text-align:center;cursor:pointer;transition:border-color .2s,transform .15s}
-.friend-card:hover{border-color:var(--teal);transform:translateY(-2px)}
-.friend-avatar{width:48px;height:64px;margin:0 auto 6px;background:var(--bg3);border-radius:4px;overflow:hidden;display:flex;align-items:flex-end;justify-content:center}
-.friend-avatar img{max-width:100%;image-rendering:pixelated}
-.friend-name{font-size:12px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.friend-online{font-family:var(--mono);font-size:10px;margin-top:2px}
-.friend-online.on{color:var(--green)}
-.friend-online.off{color:var(--text3)}
+.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.stat-card{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--rl);padding:16px;text-align:center;
+  box-shadow:var(--shadow);
+}
+.stat-num{font-family:var(--cond);font-size:30px;font-weight:700;color:var(--nav);line-height:1;margin-bottom:4px}
+.stat-label{font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.5px}
 
-/* FUNAS */
-.funas-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px}
-.funas-controls{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.funa-form{background:var(--bg1);border:1px solid var(--border);border-radius:var(--rl);padding:20px;margin-bottom:20px;animation:fadeUp .2s ease both}
-.funa-form-title{font-family:var(--disp);font-size:17px;color:var(--gold);margin-bottom:16px}
-.char-count{font-family:var(--mono);font-size:10px;color:var(--text3);text-align:right;margin-top:4px}
-.char-count.warn{color:var(--pink)}
-.optional-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.file-upload-area{border:1px dashed var(--border2);border-radius:var(--r);padding:12px;text-align:center;cursor:pointer;transition:all .2s;color:var(--text3);font-size:12px}
-.file-upload-area:hover{border-color:var(--gold);color:var(--gold);background:var(--gold-dim)}
-.img-preview{position:relative;margin-top:8px;display:inline-block}
-.img-preview img{max-width:100%;max-height:200px;border-radius:var(--r);border:1px solid var(--border);display:block}
-.img-remove{position:absolute;top:-6px;right:-6px;width:20px;height:20px;border-radius:50%;background:var(--red);color:#fff;font-size:12px;display:flex;align-items:center;justify-content:center;cursor:pointer;border:none;line-height:1}
-.form-actions{display:flex;align-items:center;justify-content:space-between;margin-top:16px}
-.filter-bar{display:flex;align-items:center;gap:8px;margin-bottom:16px;padding:8px 12px;background:var(--bg2);border-radius:var(--r);border:1px solid var(--border);font-size:13px}
-.filter-bar strong{color:var(--pink)}
-.filter-clear{margin-left:auto}
+.top-list{}
+.top-row{
+  display:flex;align-items:center;gap:10px;
+  padding:9px 12px;cursor:pointer;
+  border-radius:var(--r);transition:background .15s;
+  margin:0 -4px;
+}
+.top-row:hover{background:var(--card2)}
+.top-rank{font-family:var(--cond);font-size:13px;font-weight:700;width:28px;text-align:center;color:var(--text3)}
+.top-rank.g1{color:var(--yellow2)}
+.top-rank.g2{color:#9e9e9e}
+.top-rank.g3{color:#cd7f32}
+.top-name{flex:1;font-weight:700;font-size:13px;color:var(--text)}
+.top-cnt{font-size:12px;font-weight:700;color:var(--red)}
 
-/* FUNA CARD */
-.funa-card{background:var(--bg1);border:1px solid var(--border);border-radius:var(--rl);padding:16px;margin-bottom:12px;transition:border-color .2s;animation:fadeUp .2s ease both}
-.funa-card:hover{border-color:var(--border2)}
-.funa-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px;gap:10px}
-.funa-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.funa-author{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--teal)}
+/* ══════════════════════════════════════════════
+   FUNAS
+   ══════════════════════════════════════════════ */
+.funas-toolbar{
+  display:flex;align-items:center;justify-content:space-between;
+  flex-wrap:wrap;gap:10px;
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--rl);padding:12px 16px;
+  box-shadow:var(--shadow);
+}
+.toolbar-left{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.toolbar-title{font-family:var(--cond);font-size:18px;font-weight:700;color:var(--nav)}
+.seg{display:flex;border:1px solid var(--border2);border-radius:var(--r);overflow:hidden}
+.seg-btn{
+  padding:6px 14px;font-size:12px;font-weight:700;
+  background:#fff;color:var(--text2);border:none;cursor:pointer;transition:all .15s;
+  border-right:1px solid var(--border2);
+}
+.seg-btn:last-child{border-right:none}
+.seg-btn.active{background:var(--nav);color:#fff}
+.seg-btn:hover:not(.active){background:var(--card2)}
+
+.filter-banner{
+  display:flex;align-items:center;gap:10px;
+  background:#fff9e0;border:1px solid #ffe699;
+  border-radius:var(--r);padding:8px 14px;
+  font-size:13px;color:#856404;
+}
+.filter-banner strong{color:var(--nav)}
+.filter-banner .close-btn{margin-left:auto;background:none;border:none;cursor:pointer;color:var(--text3);font-size:16px;line-height:1;padding:0 2px}
+
+/* Funa form card */
+.funa-form-card{
+  background:var(--card);border:1px solid var(--accent);
+  border-radius:var(--rl);box-shadow:0 0 0 3px rgba(59,159,212,.1);
+  overflow:hidden;
+  animation:up .2s ease both;
+}
+.funa-form-header{
+  background:linear-gradient(135deg,var(--nav),var(--accent2));
+  color:#fff;padding:12px 16px;
+  font-family:var(--cond);font-size:14px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;
+  display:flex;align-items:center;gap:8px;
+}
+.funa-form-body{padding:16px}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.char-bar{height:3px;background:var(--border);border-radius:2px;margin-top:5px;overflow:hidden}
+.char-fill{height:100%;background:var(--accent);border-radius:2px;transition:width .2s,background .2s}
+.char-fill.warn{background:var(--red)}
+.char-info{font-size:11px;color:var(--text3);text-align:right;margin-top:3px}
+.char-info.warn{color:var(--red)}
+
+.upload-zone{
+  border:2px dashed var(--border2);border-radius:var(--r);
+  padding:14px;text-align:center;cursor:pointer;
+  transition:all .2s;color:var(--text3);font-size:13px;
+  background:#fafcfe;
+}
+.upload-zone:hover{border-color:var(--accent);color:var(--accent);background:#f0f8ff}
+.preview-wrap{position:relative;display:inline-block;margin-top:8px}
+.preview-wrap img{max-width:100%;max-height:200px;border-radius:var(--r);border:1px solid var(--border);display:block}
+.preview-remove{
+  position:absolute;top:-8px;right:-8px;
+  width:22px;height:22px;border-radius:50%;
+  background:var(--red);color:#fff;font-size:13px;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;border:2px solid #fff;line-height:1;
+}
+.form-footer{display:flex;align-items:center;justify-content:space-between;padding-top:12px;border-top:1px solid var(--border)}
+
+/* Funa card */
+.funa-card{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--rl);box-shadow:var(--shadow);
+  overflow:hidden;
+  animation:up .2s ease both;
+  transition:box-shadow .2s,border-color .2s;
+}
+.funa-card:hover{box-shadow:var(--shadow-lg);border-color:var(--border2)}
+
+.funa-top{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 14px 0;gap:8px;flex-wrap:wrap;
+}
+.funa-who{display:flex;align-items:center;gap:8px}
+.funa-author{
+  font-size:12px;font-weight:700;color:var(--accent2);
+  display:flex;align-items:center;gap:4px;
+}
 .funa-author.anon{color:var(--text3);font-style:italic}
-.funa-time{font-family:var(--mono);font-size:10px;color:var(--text3)}
-.funa-target-wrap{display:flex;align-items:center;gap:6px;margin-bottom:8px}
-.funa-target-label{font-size:11px;color:var(--text3)}
-.funa-target{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--pink);cursor:pointer}
-.funa-target:hover{text-decoration:underline}
-.funa-content{font-size:14px;color:var(--text);line-height:1.6;margin-bottom:10px;white-space:pre-wrap;word-break:break-word}
-.funa-img{width:100%;max-height:360px;object-fit:contain;border-radius:var(--r);border:1px solid var(--border);margin-bottom:12px;cursor:pointer;transition:opacity .2s;display:block}
-.funa-img:hover{opacity:.9}
-.funa-footer{display:flex;align-items:center;gap:8px;padding-top:10px;border-top:1px solid var(--border)}
-.vote-btn{display:flex;align-items:center;gap:5px;padding:5px 12px;border-radius:20px;border:1px solid var(--border);background:transparent;cursor:pointer;font-family:var(--mono);font-size:12px;color:var(--text3);transition:all .2s}
-.vote-btn:hover{border-color:var(--border2);color:var(--text)}
-.vote-btn.voted-si{color:var(--green);border-color:var(--green);background:var(--green-dim)}
-.vote-btn.voted-no{color:var(--red);border-color:var(--red);background:var(--red-dim)}
-.vote-bar{flex:1;height:4px;background:var(--bg3);border-radius:2px;overflow:hidden;margin:0 4px}
-.vote-bar-si{height:100%;border-radius:2px;background:var(--green);transition:width .4s ease}
+.funa-time{font-size:11px;color:var(--text3)}
 
-/* PAGINATION */
-.pagination{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:24px}
-.page-btn{font-family:var(--mono);font-size:12px;padding:6px 14px;border-radius:var(--r);border:1px solid var(--border);background:transparent;color:var(--text3);cursor:pointer;transition:all .2s}
-.page-btn:hover:not(:disabled){border-color:var(--gold);color:var(--gold)}
-.page-btn.active{color:var(--gold);border-color:var(--gold);background:var(--gold-dim)}
-.page-btn:disabled{opacity:.3;cursor:not-allowed}
+.funa-target-row{
+  padding:0 14px;margin-top:8px;
+  display:flex;align-items:center;gap:6px;
+}
+.funa-target-lbl{font-size:11px;color:var(--text2);font-weight:700;text-transform:uppercase;letter-spacing:.4px}
+.funa-target-name{
+  font-size:13px;font-weight:700;color:var(--nav);
+  background:var(--card2);border:1px solid var(--border);
+  padding:2px 10px;border-radius:20px;
+  cursor:pointer;transition:all .15s;
+}
+.funa-target-name:hover{background:var(--nav);color:#fff;border-color:var(--nav)}
 
-/* LIGHTBOX */
-.lightbox{position:fixed;inset:0;z-index:999;background:rgba(0,0,0,.88);display:flex;align-items:center;justify-content:center;cursor:zoom-out;animation:fadeIn .2s ease}
+.funa-content{
+  padding:10px 14px;font-size:14px;color:var(--text);
+  line-height:1.65;white-space:pre-wrap;word-break:break-word;
+}
+.funa-img{
+  width:100%;max-height:400px;object-fit:contain;
+  display:block;cursor:pointer;
+  border-top:1px solid var(--border);
+  transition:opacity .2s;
+}
+.funa-img:hover{opacity:.92}
+
+.funa-footer{
+  display:flex;align-items:center;gap:8px;
+  padding:10px 14px;border-top:1px solid var(--border);
+  background:var(--card2);
+}
+.vote-btn{
+  display:flex;align-items:center;gap:5px;
+  padding:6px 14px;border-radius:20px;
+  border:1px solid var(--border2);background:#fff;
+  cursor:pointer;font-size:12px;font-weight:700;
+  color:var(--text2);transition:all .2s;
+}
+.vote-btn:hover{border-color:var(--accent);color:var(--accent)}
+.vote-btn.si{color:#285f28;border-color:#c3e6c3;background:#f0faf0}
+.vote-btn.no{color:#9b2222;border-color:var(--red-b);background:var(--red-bg)}
+
+.vote-track{flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden}
+.vote-fill{height:100%;background:linear-gradient(to right,var(--green),var(--accent));border-radius:3px;transition:width .4s ease}
+
+/* Pagination */
+.pagination{display:flex;align-items:center;justify-content:center;gap:6px;padding:8px 0}
+.pg-btn{
+  padding:6px 12px;border-radius:var(--r);
+  border:1px solid var(--border2);background:#fff;
+  color:var(--text2);font-size:12px;font-weight:700;
+  cursor:pointer;transition:all .15s;
+}
+.pg-btn:hover:not(:disabled){border-color:var(--accent);color:var(--accent)}
+.pg-btn.active{background:var(--nav);color:#fff;border-color:var(--nav)}
+.pg-btn:disabled{opacity:.35;cursor:not-allowed}
+
+/* ══════════════════════════════════════════════
+   USUARIO
+   ══════════════════════════════════════════════ */
+.search-row{display:flex;gap:8px}
+.search-row .input{flex:1}
+
+.profile-banner{
+  background:linear-gradient(135deg,var(--hdr),var(--accent2));
+  border-radius:var(--rl);
+  padding:20px;color:#fff;
+  display:flex;align-items:flex-start;gap:16px;
+  box-shadow:var(--shadow-lg);
+}
+.avatar-frame{
+  width:90px;height:120px;
+  background:rgba(255,255,255,.15);
+  border:2px solid rgba(255,255,255,.3);
+  border-radius:var(--r);
+  overflow:hidden;flex-shrink:0;
+  display:flex;align-items:flex-end;justify-content:center;
+}
+.avatar-frame img{max-width:100%;image-rendering:pixelated}
+.profile-info{flex:1}
+.profile-name{font-family:var(--cond);font-size:26px;font-weight:700;color:#fff;text-shadow:0 2px 4px rgba(0,0,0,.2);line-height:1;margin-bottom:4px}
+.profile-motto{font-size:13px;color:rgba(255,255,255,.75);font-style:italic;margin-bottom:10px}
+.profile-tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.profile-tag{
+  font-size:11px;font-weight:700;
+  padding:3px 10px;border-radius:20px;
+  border:1px solid rgba(255,255,255,.3);
+  background:rgba(255,255,255,.15);color:rgba(255,255,255,.9);
+}
+.profile-tag.online{background:rgba(92,184,92,.3);border-color:rgba(92,184,92,.5)}
+
+.subtabs{display:flex;border-bottom:2px solid var(--border);margin-bottom:16px}
+.subtab{
+  padding:10px 18px;font-size:13px;font-weight:700;
+  color:var(--text2);background:none;border:none;
+  border-bottom:3px solid transparent;cursor:pointer;
+  margin-bottom:-2px;transition:all .2s;
+}
+.subtab:hover{color:var(--nav)}
+.subtab.active{color:var(--nav);border-bottom-color:var(--nav)}
+
+.info-table{}
+.info-row{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border)}
+.info-row:last-child{border-bottom:none}
+.info-key{font-size:12px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.3px}
+.info-val{font-size:13px;font-weight:700;color:var(--text)}
+
+/* Badges grid */
+.badges-wrap{display:flex;flex-wrap:wrap;gap:8px;padding:4px 0}
+.badge-box{
+  width:54px;height:54px;
+  background:var(--card2);border:1px solid var(--border);
+  border-radius:var(--r);overflow:hidden;
+  display:flex;align-items:center;justify-content:center;
+  cursor:default;transition:all .15s;position:relative;
+}
+.badge-box:hover{border-color:var(--accent);transform:scale(1.1);z-index:1;box-shadow:var(--shadow)}
+.badge-box img{width:44px;height:44px;image-rendering:pixelated}
+.badge-box-empty{font-size:9px;color:var(--text3);text-align:center;padding:4px;word-break:break-all;line-height:1.2}
+
+/* Friends grid */
+.friends-wrap{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;padding:4px 0}
+.friend-card{
+  background:var(--card2);border:1px solid var(--border);
+  border-radius:var(--r);padding:10px;text-align:center;
+  cursor:pointer;transition:all .15s;
+}
+.friend-card:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:var(--shadow)}
+.friend-avatar{width:44px;height:60px;margin:0 auto 6px;background:var(--border);border-radius:4px;overflow:hidden;display:flex;align-items:flex-end;justify-content:center}
+.friend-avatar img{max-width:100%;image-rendering:pixelated}
+.friend-name{font-size:12px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text)}
+.friend-status{font-size:10px;margin-top:2px;font-weight:700}
+.friend-status.on{color:var(--green)}
+.friend-status.off{color:var(--text3)}
+
+/* ── LIGHTBOX ── */
+.lightbox{position:fixed;inset:0;z-index:999;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;cursor:zoom-out;animation:fadeIn .2s}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
-.lightbox img{max-width:90vw;max-height:90vh;object-fit:contain;border-radius:var(--r);box-shadow:0 20px 60px rgba(0,0,0,.8)}
-.lightbox-close{position:absolute;top:16px;right:16px;width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.1);border:none;color:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.lightbox img{max-width:92vw;max-height:92vh;object-fit:contain;border-radius:var(--rl);box-shadow:0 20px 60px rgba(0,0,0,.7)}
+.lightbox-x{position:absolute;top:16px;right:16px;width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.12);border:none;color:#fff;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
 
-@media(max-width:500px){
-  .content{padding:16px 12px 32px}
-  .optional-row{grid-template-columns:1fr}
+@media(max-width:520px){
+  .content{padding:12px;gap:12px}
+  .two-col,.stats-row{grid-template-columns:1fr}
+  .profile-banner{flex-direction:column}
   .home-cta{flex-direction:column}
-  .profile-card{grid-template-columns:1fr}
+  .funas-toolbar{flex-direction:column;align-items:flex-start}
 }
 </style>
 </head>
 <body>
 <div class="app">
+
+  <!-- HEADER -->
   <header class="header">
     <div>
-      <div class="logo"><div class="logo-dot"></div>HabboTracker</div>
-      <div class="logo-sub">by Fungi · habbo.es</div>
+      <div class="logo">
+        <div class="logo-icon">🍄</div>
+        <div>
+          HabboTracker
+          <div class="logo-sub">by Fungi · habbo.es</div>
+        </div>
+      </div>
     </div>
-    <div id="statusBadge" class="status-badge wait">
-      <div class="status-dot"></div><span>conectando</span>
+    <div id="statusPill" class="status-pill">
+      <div class="status-dot"></div><span>conectando...</span>
     </div>
   </header>
 
+  <!-- NAV -->
   <nav class="nav">
     <button class="tab active" data-tab="home"    onclick="setTab('home')">🏠 Inicio</button>
     <button class="tab"        data-tab="funas"   onclick="setTab('funas')">🔥 Funas</button>
@@ -225,64 +562,78 @@ textarea.input{resize:vertical;min-height:90px}
   <main class="content" id="content"></main>
 </div>
 
-<div class="lightbox" id="lightbox" style="display:none" onclick="closeLightbox()">
-  <button class="lightbox-close">✕</button>
-  <img id="lightboxImg" src="" alt="">
+<!-- LIGHTBOX -->
+<div class="lightbox" id="lightbox" style="display:none" onclick="closeLB()">
+  <button class="lightbox-x" onclick="closeLB()">✕</button>
+  <img id="lbImg" src="" alt="">
 </div>
 
 <script>
-// ─── CONFIG ───────────────────────────────────
-const API_BASE = (() => {
+// ═══════════════════════════════════════════════════════
+// CONFIG
+// ═══════════════════════════════════════════════════════
+const API = (() => {
   const h = window.location.hostname;
-  if (h === 'localhost' || h === '127.0.0.1') return 'http://localhost:3001';
-  return 'https://habbotracker.onrender.com';
+  return (h === 'localhost' || h === '127.0.0.1')
+    ? 'http://localhost:3001'
+    : 'https://habbotracker.onrender.com';
 })();
 
-// ─── STATE ────────────────────────────────────
+// ═══════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════
 const S = {
   tab: 'home',
-  home: { stats: null, loading: false },
+  home:  { stats: null, loading: false },
   funas: {
     items: [], total: 0, page: 1, pages: 1,
-    sort: 'new', targetFilter: null,
+    sort: 'new', filter: null,
     loading: false, err: null,
-    formOpen: false,
-    formTarget: '', formContent: '', formHabbo: '',
-    formFile: null, formPreview: null,
+    formOpen: false, formTarget: '', formContent: '',
+    formHabbo: '', formFile: null, formPreview: null,
     formErr: null, formLoading: false,
   },
   user: {
     q: '', loading: false, err: null,
-    profile: null, badges: null, friends: null, sub: 'info',
+    data: null,      // resultado de /api/users/:name  (uniqueId + selectedBadges incluidos)
+    friends: null,   // null = no cargado
+    sub: 'info',
   },
 };
 
-// ─── API ──────────────────────────────────────
-async function api(path, opts = {}) {
-  const res = await fetch(API_BASE + path, { signal: AbortSignal.timeout(12000), ...opts });
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.error || `Error ${res.status}`);
-  return data;
+// ═══════════════════════════════════════════════════════
+// API HELPER
+// ═══════════════════════════════════════════════════════
+async function apiFetch(path, opts = {}) {
+  const r = await fetch(API + path, { signal: AbortSignal.timeout(12000), ...opts });
+  const d = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(d.error || `Error ${r.status}`);
+  return d;
 }
 
+// ═══════════════════════════════════════════════════════
+// HEALTH
+// ═══════════════════════════════════════════════════════
 async function checkHealth() {
-  const badge = document.getElementById('statusBadge');
+  const el = document.getElementById('statusPill');
   try {
-    await api('/health');
-    badge.className = 'status-badge ok';
-    badge.innerHTML = '<div class="status-dot"></div><span>API OK</span>';
+    await apiFetch('/health');
+    el.className = 'status-pill ok';
+    el.innerHTML = '<div class="status-dot"></div><span>API OK</span>';
   } catch {
-    badge.className = 'status-badge err';
-    badge.innerHTML = '<div class="status-dot"></div><span>SIN API</span>';
+    el.className = 'status-pill err';
+    el.innerHTML = '<div class="status-dot"></div><span>Sin API</span>';
   }
 }
 
-// ─── ROUTER ───────────────────────────────────
+// ═══════════════════════════════════════════════════════
+// ROUTER
+// ═══════════════════════════════════════════════════════
 function setTab(tab) {
   S.tab = tab;
   document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
-  if (tab === 'funas' && !S.funas.items.length && !S.funas.loading) loadFunas();
-  if (tab === 'home'  && !S.home.stats && !S.home.loading) loadHomeStats();
+  if (tab === 'funas'   && !S.funas.items.length   && !S.funas.loading)  loadFunas();
+  if (tab === 'home'    && !S.home.stats            && !S.home.loading)   loadStats();
   render();
 }
 
@@ -292,321 +643,352 @@ function render() {
   el.innerHTML = `<div class="screen">${fn()}</div>`;
 }
 
-// ─── HOME ─────────────────────────────────────
+// ═══════════════════════════════════════════════════════
+// HOME
+// ═══════════════════════════════════════════════════════
 function renderHome() {
   const st = S.home.stats;
   return `
-    <div class="home-hero">
-      <h1>HabboTracker</h1>
-      <p>Explorador de la comunidad Habbo.es · No oficial</p>
-    </div>
-
-    ${S.home.loading ? `<div class="loading-center"><div class="spinner"></div></div>` : ''}
-
-    ${st ? `
-    <div class="stats-grid">
-      <div class="stat-card"><div class="stat-num">${st.totalFunas}</div><div class="stat-label">Funas</div></div>
-      <div class="stat-card"><div class="stat-num">${st.conNombre}</div><div class="stat-label">Con firma</div></div>
-      <div class="stat-card"><div class="stat-num">${st.conImagen}</div><div class="stat-label">Con imagen</div></div>
-    </div>
-    ${st.topFunados?.length ? `
-    <div class="card" style="margin-top:0">
-      <div style="font-family:var(--mono);font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);margin-bottom:12px">🏆 Más funados</div>
-      ${st.topFunados.map((f,i) => `
-        <div class="top-item" onclick="goFunasByTarget('${esc(f.name)}')">
-          <div class="top-rank ${i===0?'gold':i===1?'silver':i===2?'bronze':''}">${i===0?'👑':i+1}</div>
-          <div class="top-name">${esc(f.name)}</div>
-          <div class="top-count">🔥 ${f.count}</div>
-        </div>`).join('')}
-    </div>` : ''}` : ''}
-
+  <div class="home-hero">
+    <h1>🍄 HabboTracker</h1>
+    <p>Explorador no oficial de la comunidad Habbo.es</p>
     <div class="home-cta">
-      <button class="btn btn-primary" onclick="setTab('funas')">🔥 Ver funas</button>
-      <button class="btn btn-secondary" onclick="setTab('usuario')">👤 Buscar usuario</button>
-    </div>`;
+      <button class="btn btn-yellow" onclick="setTab('funas')">🔥 Ver funas</button>
+      <button class="btn btn-outline" style="color:#fff;border-color:rgba(255,255,255,.5);background:rgba(255,255,255,.1)" onclick="setTab('usuario')">👤 Buscar usuario</button>
+    </div>
+  </div>
+
+  ${S.home.loading ? `<div class="loading-center"><div class="spinner"></div><span>Cargando estadísticas...</span></div>` : ''}
+
+  ${st ? `
+  <div class="stats-row">
+    <div class="stat-card"><div class="stat-num">${st.totalFunas}</div><div class="stat-label">🔥 Funas publicadas</div></div>
+    <div class="stat-card"><div class="stat-num">${st.conNombre}</div><div class="stat-label">✍️ Con firma</div></div>
+    <div class="stat-card"><div class="stat-num">${st.conImagen}</div><div class="stat-label">📸 Con imagen</div></div>
+  </div>
+
+  ${st.topFunados?.length ? `
+  <div class="card">
+    <div class="card-header">🏆 Ranking de más funados</div>
+    <div class="card-body top-list">
+      ${st.topFunados.map((f,i) => `
+        <div class="top-row" onclick="goByTarget('${esc(f.name)}')">
+          <div class="top-rank ${i===0?'g1':i===1?'g2':i===2?'g3':''}">${i===0?'👑':i+1}</div>
+          <div class="top-name">${esc(f.name)}</div>
+          <div class="top-cnt">🔥 ${f.count} funa${f.count!==1?'s':''}</div>
+        </div>
+      `).join('')}
+    </div>
+  </div>` : ''}
+  ` : ''}`;
 }
 
-async function loadHomeStats() {
+async function loadStats() {
   S.home.loading = true; render();
-  try { S.home.stats = await api('/funas/stats'); } catch {}
+  try { S.home.stats = await apiFetch('/funas/stats'); } catch {}
   S.home.loading = false; render();
 }
 
-function goFunasByTarget(name) {
-  S.funas.targetFilter = name; S.funas.page = 1;
-  setTab('funas');
-  loadFunas();
+function goByTarget(name) {
+  S.funas.filter = name; S.funas.page = 1;
+  setTab('funas'); loadFunas();
 }
 
-// ─── FUNAS ────────────────────────────────────
+// ═══════════════════════════════════════════════════════
+// FUNAS
+// ═══════════════════════════════════════════════════════
 function renderFunas() {
   const f = S.funas;
   return `
-    <div class="funas-header">
-      <div class="section-title" style="margin-bottom:0">🔥 Funas</div>
-      <div class="funas-controls">
-        <button class="sort-btn ${f.sort==='new'?'active':''}" onclick="setSort('new')">Recientes</button>
-        <button class="sort-btn ${f.sort==='top'?'active':''}" onclick="setSort('top')">Más votadas</button>
-        <button class="btn btn-primary" onclick="toggleFunaForm()">+ Nueva funa</button>
+  <div class="funas-toolbar">
+    <div class="toolbar-left">
+      <span class="toolbar-title">🔥 Funas</span>
+      <div class="seg">
+        <button class="seg-btn ${f.sort==='new'?'active':''}" onclick="setSort('new')">Recientes</button>
+        <button class="seg-btn ${f.sort==='top'?'active':''}" onclick="setSort('top')">Más votadas</button>
       </div>
     </div>
+    <button class="btn btn-blue ${f.formOpen?'btn-outline':''}" onclick="toggleForm()">
+      ${f.formOpen ? '✕ Cancelar' : '+ Nueva funa'}
+    </button>
+  </div>
 
-    ${f.targetFilter ? `
-    <div class="filter-bar">
-      🔎 Funas de: <strong>${esc(f.targetFilter)}</strong>
-      <button class="btn-ghost btn filter-clear" onclick="clearTargetFilter()">✕ Quitar filtro</button>
-    </div>` : ''}
+  ${f.filter ? `
+  <div class="filter-banner">
+    🔎 Mostrando funas de: <strong>${esc(f.filter)}</strong>
+    <button class="close-btn" onclick="clearFilter()">✕</button>
+  </div>` : ''}
 
-    ${f.formOpen ? renderFunaForm() : ''}
+  ${f.formOpen ? renderForm() : ''}
 
-    ${f.loading ? `<div class="loading-center"><div class="spinner"></div></div>` :
-      f.err    ? `<div class="err-box">${esc(f.err)}</div>` :
-      f.items.length === 0 ? `<div class="empty-state"><div class="emoji">😶</div><p>No hay funas todavía.<br>¡Sé el primero en publicar!</p></div>` :
-      f.items.map(renderFunaCard).join('')}
+  ${f.loading
+    ? `<div class="loading-center"><div class="spinner"></div><span>Cargando funas...</span></div>`
+    : f.err
+    ? `<div class="err-box">⚠️ ${esc(f.err)}</div>`
+    : f.items.length === 0
+    ? `<div class="empty-state"><div class="emoji">😶</div><p>No hay funas todavía.<br>¡Sé el primero en publicar!</p></div>`
+    : f.items.map(renderFunaCard).join('')}
 
-    ${f.pages > 1 ? renderPagination(f.page, f.pages) : ''}`;
+  ${f.pages > 1 ? renderPager(f.page, f.pages) : ''}`;
 }
 
-function renderFunaForm() {
+function renderForm() {
   const f = S.funas;
+  const len = f.formContent.length;
   return `
-  <div class="funa-form">
-    <div class="funa-form-title">📢 Nueva funa</div>
-    ${f.formErr ? `<div class="err-box">${esc(f.formErr)}</div>` : ''}
-    <div class="optional-row">
-      <div class="form-group">
-        <label class="label">¿A quién funas? (opcional)</label>
-        <input class="input" id="fTarget" placeholder="Nombre en Habbo..." value="${esc(f.formTarget)}" oninput="S.funas.formTarget=this.value">
+  <div class="funa-form-card">
+    <div class="funa-form-header">📢 Nueva denuncia pública</div>
+    <div class="funa-form-body">
+      ${f.formErr ? `<div class="err-box">${esc(f.formErr)}</div>` : ''}
+      <div class="two-col">
+        <div class="form-group">
+          <label class="label">¿A quién funas? (opcional)</label>
+          <input class="input" placeholder="Nombre en Habbo..." value="${esc(f.formTarget)}" oninput="S.funas.formTarget=this.value">
+        </div>
+        <div class="form-group">
+          <label class="label">Tu nombre (opcional)</label>
+          <input class="input" placeholder="Dejar en blanco = anónimo" value="${esc(f.formHabbo)}" oninput="S.funas.formHabbo=this.value">
+        </div>
       </div>
       <div class="form-group">
-        <label class="label">Tu nombre (opcional)</label>
-        <input class="input" id="fHabbo" placeholder="Anónimo por defecto" value="${esc(f.formHabbo)}" oninput="S.funas.formHabbo=this.value">
+        <label class="label">Denuncia <span style="color:var(--red)">*</span></label>
+        <textarea class="input" placeholder="Contá qué pasó... sé específico (mínimo 5 caracteres)" maxlength="500"
+          oninput="S.funas.formContent=this.value;updateBar()">${esc(f.formContent)}</textarea>
+        <div class="char-bar"><div class="char-fill${len>440?' warn':''}" id="charFill" style="width:${len/5}%"></div></div>
+        <div class="char-info${len>440?' warn':''}">${len}/500</div>
       </div>
-    </div>
-    <div class="form-group">
-      <label class="label">Denuncia <span style="color:var(--red)">*</span></label>
-      <textarea class="input" id="fContent" placeholder="Contá qué pasó... (mínimo 5 caracteres)" maxlength="500" oninput="S.funas.formContent=this.value;updateCharCount()">${esc(f.formContent)}</textarea>
-      <div class="char-count" id="charCount">${f.formContent.length}/500</div>
-    </div>
-    <div class="form-group">
-      <label class="label">Evidencia (imagen · opcional)</label>
-      ${f.formPreview ? `
-        <div class="img-preview">
-          <img src="${f.formPreview}" alt="">
-          <button class="img-remove" onclick="removeFormImg()">✕</button>
-        </div>` : `
-        <div class="file-upload-area" onclick="document.getElementById('fFile').click()">📎 Subir captura de pantalla</div>
-        <input type="file" id="fFile" accept="image/*" style="display:none" onchange="handleFileSelect(event)">`}
-    </div>
-    <div class="form-actions">
-      <button class="btn btn-secondary" onclick="toggleFunaForm()">Cancelar</button>
-      <button class="btn btn-primary" onclick="submitFuna()" ${f.formLoading?'disabled':''}>
-        ${f.formLoading ? '<div class="spinner" style="width:16px;height:16px;border-width:2px;margin:0"></div>' : '🔥 Publicar funa'}
-      </button>
+      <div class="form-group">
+        <label class="label">Evidencia (imagen · opcional)</label>
+        ${f.formPreview ? `
+          <div class="preview-wrap">
+            <img src="${f.formPreview}" alt="">
+            <button class="preview-remove" onclick="removeImg()">✕</button>
+          </div>` : `
+          <div class="upload-zone" onclick="document.getElementById('fFile').click()">
+            📎 Clic para subir captura de pantalla<br><span style="font-size:11px">JPG, PNG, GIF, WEBP · máx 5 MB</span>
+          </div>
+          <input type="file" id="fFile" accept="image/*" style="display:none" onchange="pickFile(event)">`}
+      </div>
+      <div class="form-footer">
+        <span style="font-size:12px;color:var(--text3)">🕵️ Anónimo por defecto si no ponés tu nombre</span>
+        <button class="btn btn-blue" onclick="submitFuna()" ${f.formLoading?'disabled':''}>
+          ${f.formLoading ? '<div class="spinner" style="width:15px;height:15px;border-width:2px;margin:0"></div>' : '🔥 Publicar'}
+        </button>
+      </div>
     </div>
   </div>`;
 }
 
 function renderFunaCard(funa) {
-  const si = funa.votesSi || 0, no = funa.votesNo || 0, tot = si + no;
-  const siPct = tot > 0 ? Math.round(si / tot * 100) : 50;
+  const si = funa.votesSi||0, no = funa.votesNo||0, tot = si+no;
+  const pct = tot > 0 ? Math.round(si/tot*100) : 50;
   return `
   <div class="funa-card">
-    <div class="funa-header">
-      <div class="funa-meta">
-        ${funa.habboName ? `<span class="funa-author">👤 ${esc(funa.habboName)}</span>` : `<span class="funa-author anon">🕵️ Anónimo</span>`}
-        <span class="funa-time">${timeAgo(funa.createdAt)}</span>
+    <div class="funa-top">
+      <div class="funa-who">
+        <span class="funa-author ${funa.habboName?'':'anon'}">
+          ${funa.habboName ? `<span>👤</span> ${esc(funa.habboName)}` : '<span>🕵️</span> Anónimo'}
+        </span>
+        <span class="funa-time">· ${timeAgo(funa.createdAt)}</span>
       </div>
+      ${funa.target ? `<span class="badge-pill badge-red" style="font-size:10px">🎯 Funa</span>` : `<span class="badge-pill badge-blue" style="font-size:10px">📢 Denuncia</span>`}
     </div>
+
     ${funa.target ? `
-    <div class="funa-target-wrap">
-      <span class="funa-target-label">Funa a:</span>
-      <span class="funa-target" onclick="goFunasByTarget('${esc(funa.target)}')">${esc(funa.target)}</span>
+    <div class="funa-target-row">
+      <span class="funa-target-lbl">Funa a:</span>
+      <span class="funa-target-name" onclick="goByTarget('${esc(funa.target)}')">${esc(funa.target)}</span>
     </div>` : ''}
+
     <div class="funa-content">${esc(funa.content)}</div>
-    ${funa.imageUrl ? `<img class="funa-img" src="${API_BASE}${funa.imageUrl}" alt="Evidencia" onclick="openLightbox('${API_BASE}${funa.imageUrl}')" onerror="this.style.display='none'">` : ''}
+
+    ${funa.imageUrl ? `<img class="funa-img" src="${API}${funa.imageUrl}" alt="Evidencia" onclick="openLB('${API}${funa.imageUrl}')" onerror="this.style.display='none'">` : ''}
+
     <div class="funa-footer">
-      <button class="vote-btn ${funa.myVote==='si'?'voted-si':''}" onclick="vote('${funa.id}','si')">👍 ${si}</button>
-      <div class="vote-bar"><div class="vote-bar-si" style="width:${tot?siPct:50}%"></div></div>
-      <button class="vote-btn ${funa.myVote==='no'?'voted-no':''}" onclick="vote('${funa.id}','no')">👎 ${no}</button>
+      <button class="vote-btn ${funa.myVote==='si'?'si':''}" onclick="vote('${funa.id}','si')">👍 ${si}</button>
+      <div class="vote-track"><div class="vote-fill" style="width:${pct}%"></div></div>
+      <button class="vote-btn ${funa.myVote==='no'?'no':''}" onclick="vote('${funa.id}','no')">👎 ${no}</button>
     </div>
   </div>`;
 }
 
-function renderPagination(page, pages) {
-  const b = (label, p, disabled, active) =>
-    `<button class="page-btn${active?' active':''}" onclick="goPage(${p})" ${disabled?'disabled':''}>${label}</button>`;
-  let html = b('‹', page-1, page<=1, false);
-  const s = Math.max(1, page-2), e = Math.min(pages, page+2);
-  if (s > 1) html += b(1, 1, false, false) + (s>2?`<span style="color:var(--text3)">…</span>`:'');
-  for (let i=s;i<=e;i++) html += b(i,i,false,i===page);
-  if (e < pages) html += (e<pages-1?`<span style="color:var(--text3)">…</span>`:'') + b(pages,pages,false,false);
-  html += b('›', page+1, page>=pages, false);
-  return `<div class="pagination">${html}</div>`;
+function renderPager(page, pages) {
+  let h = `<button class="pg-btn" onclick="goPage(${page-1})" ${page<=1?'disabled':''}>‹</button>`;
+  const s = Math.max(1,page-2), e = Math.min(pages,page+2);
+  if (s>1) h += `<button class="pg-btn" onclick="goPage(1)">1</button>${s>2?'<span style="color:var(--text3);padding:0 4px">…</span>':''}`;
+  for(let i=s;i<=e;i++) h += `<button class="pg-btn ${i===page?'active':''}" onclick="goPage(${i})">${i}</button>`;
+  if (e<pages) h += `${e<pages-1?'<span style="color:var(--text3);padding:0 4px">…</span>':''}<button class="pg-btn" onclick="goPage(${pages})">${pages}</button>`;
+  h += `<button class="pg-btn" onclick="goPage(${page+1})" ${page>=pages?'disabled':''}>›</button>`;
+  return `<div class="pagination">${h}</div>`;
 }
 
 function setSort(s) { S.funas.sort=s; S.funas.page=1; render(); loadFunas(); }
-function goPage(p)  { S.funas.page=p; loadFunas(); window.scrollTo(0,0); }
-function clearTargetFilter() { S.funas.targetFilter=null; S.funas.page=1; loadFunas(); }
-
-function toggleFunaForm() {
+function goPage(p) { S.funas.page=p; loadFunas(); window.scrollTo({top:0,behavior:'smooth'}); }
+function clearFilter() { S.funas.filter=null; S.funas.page=1; loadFunas(); }
+function toggleForm() {
   S.funas.formOpen = !S.funas.formOpen;
-  if (!S.funas.formOpen) {
-    Object.assign(S.funas, { formTarget:'', formContent:'', formHabbo:'', formFile:null, formPreview:null, formErr:null, formLoading:false });
-  }
+  if (!S.funas.formOpen) resetForm();
   render();
 }
-
-function updateCharCount() {
-  const el = document.getElementById('charCount');
-  if (!el) return;
+function resetForm() { Object.assign(S.funas,{formTarget:'',formContent:'',formHabbo:'',formFile:null,formPreview:null,formErr:null,formLoading:false}); }
+function updateBar() {
   const len = S.funas.formContent.length;
-  el.textContent = `${len}/500`;
-  el.className = 'char-count' + (len > 440 ? ' warn' : '');
+  const fill = document.getElementById('charFill');
+  if (fill) { fill.style.width = (len/5)+'%'; fill.className = 'char-fill'+(len>440?' warn':''); }
 }
-
-function handleFileSelect(e) {
-  const file = e.target.files[0];
-  if (!file) return;
-  S.funas.formFile = file;
-  const reader = new FileReader();
-  reader.onload = ev => { S.funas.formPreview = ev.target.result; render(); };
-  reader.readAsDataURL(file);
+function pickFile(e) {
+  const f = e.target.files[0]; if (!f) return;
+  S.funas.formFile = f;
+  const r = new FileReader();
+  r.onload = ev => { S.funas.formPreview = ev.target.result; render(); };
+  r.readAsDataURL(f);
 }
-
-function removeFormImg() { S.funas.formFile=null; S.funas.formPreview=null; render(); }
+function removeImg() { S.funas.formFile=null; S.funas.formPreview=null; render(); }
 
 async function submitFuna() {
   const f = S.funas;
-  if (!f.formContent.trim() || f.formContent.trim().length < 5) {
-    f.formErr = 'El contenido debe tener al menos 5 caracteres'; render(); return;
-  }
-  f.formLoading = true; f.formErr = null; render();
+  if (!f.formContent.trim() || f.formContent.trim().length < 5) { f.formErr='Mínimo 5 caracteres'; render(); return; }
+  f.formLoading=true; f.formErr=null; render();
   try {
     const fd = new FormData();
     fd.append('content', f.formContent.trim());
     if (f.formTarget.trim()) fd.append('target', f.formTarget.trim());
     if (f.formHabbo.trim())  fd.append('habboName', f.formHabbo.trim());
     if (f.formFile)          fd.append('image', f.formFile, f.formFile.name);
-
-    const res = await fetch(API_BASE + '/funas', { method: 'POST', body: fd });
-    const d = await res.json().catch(() => ({}));
-    if (!res.ok) throw new Error(d.error || `Error ${res.status}`);
-
+    const r = await fetch(API+'/funas',{method:'POST',body:fd});
+    const d = await r.json().catch(()=>({}));
+    if (!r.ok) throw new Error(d.error||`Error ${r.status}`);
     f.items.unshift(d); f.total++;
-    Object.assign(f, { formOpen:false, formTarget:'', formContent:'', formHabbo:'', formFile:null, formPreview:null, formErr:null });
-    S.home.stats = null; // refresh stats
+    f.formOpen=false; resetForm();
+    S.home.stats=null;
     render();
-  } catch (e) { f.formErr = e.message; }
-  f.formLoading = false; render();
+  } catch(e) { f.formErr=e.message; }
+  f.formLoading=false; render();
 }
 
 async function loadFunas() {
   const f = S.funas;
-  f.loading = true; f.err = null; render();
+  f.loading=true; f.err=null; render();
   try {
-    const p = new URLSearchParams({ page: f.page, sort: f.sort });
-    if (f.targetFilter) p.set('target', f.targetFilter);
-    const data = await api('/funas?' + p);
-    Object.assign(f, { items: data.items, total: data.total, page: data.page, pages: data.pages });
-  } catch (e) { f.err = e.message; }
-  f.loading = false; render();
+    const p = new URLSearchParams({page:f.page,sort:f.sort});
+    if (f.filter) p.set('target',f.filter);
+    const d = await apiFetch('/funas?'+p);
+    Object.assign(f,{items:d.items,total:d.total,page:d.page,pages:d.pages});
+  } catch(e) { f.err=e.message; }
+  f.loading=false; render();
 }
 
-async function vote(funaId, v) {
+async function vote(id, v) {
   try {
-    const data = await api(`/funas/${funaId}/vote`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ vote: v })
-    });
-    const funa = S.funas.items.find(f => f.id === funaId);
-    if (funa) { funa.votesSi = data.votesSi; funa.votesNo = data.votesNo; funa.myVote = data.myVote; render(); }
-  } catch (e) { console.error(e.message); }
+    const d = await apiFetch(`/funas/${id}/vote`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({vote:v})});
+    const funa = S.funas.items.find(f=>f.id===id);
+    if (funa) { funa.votesSi=d.votesSi; funa.votesNo=d.votesNo; funa.myVote=d.myVote; render(); }
+  } catch {}
 }
 
-// ─── USUARIO ──────────────────────────────────
+// ═══════════════════════════════════════════════════════
+// USUARIO
+// ═══════════════════════════════════════════════════════
 function renderUsuario() {
   const u = S.user;
   return `
-    <div class="section-title">👤 Usuario</div>
-    <div class="search-bar">
-      <input class="input" id="userSearch" placeholder="Nombre en Habbo.es..." value="${esc(u.q)}"
-        oninput="S.user.q=this.value" onkeydown="if(event.key==='Enter')searchUser()">
-      <button class="btn btn-primary" onclick="searchUser()">Buscar</button>
+  <div class="card">
+    <div class="card-header">👤 Buscar jugador de Habbo.es</div>
+    <div class="card-body">
+      <div class="search-row">
+        <input class="input" placeholder="Nombre exacto en Habbo.es..." value="${esc(u.q)}"
+          oninput="S.user.q=this.value" onkeydown="if(event.key==='Enter')searchUser()">
+        <button class="btn btn-blue" onclick="searchUser()" ${u.loading?'disabled':''}>
+          ${u.loading ? '<div class="spinner" style="width:15px;height:15px;border-width:2px;margin:0"></div>' : 'Buscar'}
+        </button>
+      </div>
+      ${u.err ? `<div class="err-box" style="margin-top:12px">⚠️ ${esc(u.err)}</div>` : ''}
     </div>
-    ${u.loading ? `<div class="loading-center"><div class="spinner"></div></div>` :
-      u.err     ? `<div class="err-box">${esc(u.err)}</div>` :
-      u.profile ? renderUserProfile() : `<div class="empty-state"><div class="emoji">🔍</div><p>Ingresá un nombre para buscar un jugador</p></div>`}`;
+  </div>
+
+  ${u.data && !u.loading ? renderProfile() : !u.data && !u.loading && !u.err ? `
+  <div class="empty-state">
+    <div class="emoji">🔍</div>
+    <p>Ingresá el nombre exacto de un jugador<br>para ver su perfil, placas y amigos.</p>
+  </div>` : ''}`;
 }
 
-function renderUserProfile() {
-  const u = S.user, p = u.profile;
-  const fig  = p.figureString || p.habboFigure || '';
-  const name = p.name || p.habboName || '';
+function renderProfile() {
+  const u = S.user, p = u.data;
+  const name = p.name || '';
+  const fig  = p.figureString || '';
+  const priv = p.profileVisible === false;
+
   return `
-  <div class="card profile-card">
-    <div class="avatar-wrap">
-      ${fig ? `<img src="${API_BASE}/avatar?figure=${encodeURIComponent(fig)}&size=l" alt="${esc(name)}" onerror="this.style.display='none'">` : ''}
+  <div class="profile-banner">
+    <div class="avatar-frame">
+      ${fig ? `<img src="${API}/avatar?figure=${encodeURIComponent(fig)}&size=l" alt="${esc(name)}" onerror="this.style.display='none'">` : ''}
     </div>
     <div class="profile-info">
       <div class="profile-name">${esc(name)}</div>
       ${p.motto ? `<div class="profile-motto">"${esc(p.motto)}"</div>` : ''}
-      <div class="profile-meta">
-        ${p.memberSince  ? `<span class="tag tag-teal">📅 ${p.memberSince.slice(0,10)}</span>` : ''}
-        ${p.online != null ? `<span class="tag ${p.online?'tag-gold':''}">${p.online?'🟢 En línea':'⚫ Offline'}</span>` : ''}
-        ${p.starPlayerScore != null ? `<span class="tag tag-pink">⭐ ${p.starPlayerScore}</span>` : ''}
+      <div class="profile-tags">
+        ${p.online!=null ? `<span class="profile-tag ${p.online?'online':''}">${p.online?'🟢 En línea':'⚫ Desconectado'}</span>` : ''}
+        ${p.memberSince  ? `<span class="profile-tag">📅 Desde ${p.memberSince.slice(0,7)}</span>` : ''}
+        ${p.currentLevel != null ? `<span class="profile-tag">⭐ Nv. ${p.currentLevel}</span>` : ''}
+        ${priv ? `<span class="profile-tag" style="background:rgba(217,83,79,.3);border-color:rgba(217,83,79,.5)">🔒 Perfil privado</span>` : ''}
       </div>
-      <div style="margin-top:8px">
-        <button class="btn btn-secondary" style="font-size:12px;padding:6px 12px" onclick="prefillFuna('${esc(name)}')">🔥 Funar a este usuario</button>
-      </div>
+      <button class="btn btn-yellow btn-sm" onclick="prefillFuna('${esc(name)}')">🔥 Funar a ${esc(name)}</button>
     </div>
   </div>
-  <div style="display:flex;gap:8px;margin:16px 0">
-    <button class="sort-btn ${u.sub==='info'   ?'active':''}" onclick="setUserSub('info')">Info</button>
-    <button class="sort-btn ${u.sub==='badges' ?'active':''}" onclick="setUserSub('badges')">Placas</button>
-    <button class="sort-btn ${u.sub==='friends'?'active':''}" onclick="setUserSub('friends')">Amigos</button>
-  </div>
-  ${u.sub==='badges'?renderBadges():u.sub==='friends'?renderFriends():renderUserInfo()}`;
+
+  ${priv ? `<div class="info-box">🔒 Este jugador tiene el perfil privado. Las placas y amigos no están disponibles.</div>` : ''}
+
+  <div class="card">
+    <div class="subtabs">
+      <button class="subtab ${u.sub==='info'?'active':''}"    onclick="setSub('info')">Info</button>
+      <button class="subtab ${u.sub==='badges'?'active':''}"  onclick="setSub('badges')">Placas</button>
+      ${!priv ? `<button class="subtab ${u.sub==='friends'?'active':''}" onclick="setSub('friends')">Amigos</button>` : ''}
+    </div>
+    <div class="card-body">
+      ${u.sub==='info'    ? renderInfo()    :
+        u.sub==='badges'  ? renderBadges()  :
+        u.sub==='friends' ? renderFriends() : ''}
+    </div>
+  </div>`;
 }
 
-function renderUserInfo() {
-  const p = S.user.profile;
+function renderInfo() {
+  const p = S.user.data;
   const rows = [
-    ['Nivel', p.currentLevel],
-    ['Puntos logro', p.totalExperience ?? p.achievementScore],
+    ['Nivel', p.currentLevel != null ? `Nv. ${p.currentLevel} (${p.currentLevelCompletePercent||0}%)` : null],
+    ['Experiencia', p.totalExperience],
+    ['Star gems', p.starGemCount],
     ['Miembro desde', p.memberSince?.slice(0,10)],
     ['Último acceso', p.lastAccessTime?.slice(0,10)],
   ].filter(([,v]) => v != null && v !== '');
-  if (!rows.length) return `<div class="empty-state"><div class="emoji">📭</div><p>Sin info adicional</p></div>`;
-  return `<div class="card">${rows.map(([k,v])=>`
-    <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)">
-      <span style="color:var(--text3);font-family:var(--mono);font-size:12px">${k}</span>
-      <span style="font-weight:700">${esc(String(v))}</span>
-    </div>`).join('')}</div>`;
+  if (!rows.length) return `<div class="empty-state" style="padding:24px"><div class="emoji" style="font-size:28px">📭</div><p>Sin info adicional visible</p></div>`;
+  return `<div class="info-table">${rows.map(([k,v])=>`<div class="info-row"><span class="info-key">${k}</span><span class="info-val">${esc(String(v))}</span></div>`).join('')}</div>`;
 }
 
 function renderBadges() {
-  const u = S.user;
-  if (u.badges === null) { loadUserBadges(); return `<div class="loading-center"><div class="spinner"></div></div>`; }
-  if (!u.badges.length) return `<div class="empty-state"><div class="emoji">🏅</div><p>Sin placas visibles</p></div>`;
-  return `<div class="card"><div class="badges-grid">${u.badges.map(b => {
+  // selectedBadges ya viene en los datos del lookup inicial
+  const badges = S.user.data?.selectedBadges || [];
+  if (!badges.length) return `<div class="empty-state" style="padding:24px"><div class="emoji" style="font-size:28px">🏅</div><p>Sin placas seleccionadas visibles</p></div>`;
+  return `<div class="badges-wrap">${badges.map(b => {
     const code = b.code || b.badgeCode || '';
-    return `<div class="badge-item" title="${esc(b.name||b.badgeName||code)}">
-      ${code ? `<img src="${API_BASE}/badge/${code}" alt="${esc(code)}" onerror="this.innerHTML='<div class=badge-empty>${esc(code)}</div>';this.style.border='none'">` : '<div class="badge-empty">?</div>'}
+    return `<div class="badge-box" title="${esc(b.name||b.badgeName||code)}">
+      ${code ? `<img src="${API}/badge/${code}" alt="${esc(code)}" onerror="this.outerHTML='<div class=badge-box-empty>${esc(code)}</div>'">` : '<div class="badge-box-empty">?</div>'}
     </div>`;
-  }).join('')}</div></div>`;
+  }).join('')}</div>`;
 }
 
 function renderFriends() {
   const u = S.user;
-  if (u.friends === null) { loadUserFriends(); return `<div class="loading-center"><div class="spinner"></div></div>`; }
-  if (!u.friends.length) return `<div class="empty-state"><div class="emoji">👥</div><p>Sin amigos visibles</p></div>`;
-  return `<div class="friends-grid">${u.friends.map(f => {
-    const fig = f.figureString || f.habboFigure || '';
-    const nm = f.name || f.habboName || '';
-    return `<div class="friend-card" onclick="loadFriendProfile('${esc(nm)}')">
-      <div class="friend-avatar">${fig?`<img src="${API_BASE}/avatar?figure=${encodeURIComponent(fig)}&size=s" alt="" onerror="this.style.display='none'">`:''}</div>
+  if (u.friends === null) { loadFriends(); return `<div class="loading-center"><div class="spinner"></div><span>Cargando amigos...</span></div>`; }
+  if (!u.friends.length) return `<div class="empty-state" style="padding:24px"><div class="emoji" style="font-size:28px">👥</div><p>Sin amigos visibles</p></div>`;
+  return `<div class="friends-wrap">${u.friends.map(f => {
+    const nm = f.name||'';
+    const fig = f.figureString||'';
+    return `<div class="friend-card" onclick="loadFriend('${esc(nm)}')">
+      <div class="friend-avatar">${fig?`<img src="${API}/avatar?figure=${encodeURIComponent(fig)}&size=s" onerror="this.style.display='none'" alt="">`:''}</div>
       <div class="friend-name">${esc(nm)}</div>
-      <div class="friend-online ${f.online?'on':'off'}">${f.online?'🟢 En línea':'⚫ Offline'}</div>
+      <div class="friend-status ${f.online?'on':'off'}">${f.online?'🟢 En línea':'⚫ Offline'}</div>
     </div>`;
   }).join('')}</div>`;
 }
@@ -614,77 +996,71 @@ function renderFriends() {
 async function searchUser() {
   const q = S.user.q.trim();
   if (!q) return;
-  Object.assign(S.user, { loading:true, err:null, profile:null, badges:null, friends:null, sub:'info' });
+  Object.assign(S.user, {loading:true,err:null,data:null,friends:null,sub:'info'});
   render();
-  try { S.user.profile = await api(`/api/users/${encodeURIComponent(q)}/profile`); }
-  catch (e) { S.user.err = e.message; }
+  try {
+    // Un solo call: /api/users/:name devuelve todo (uniqueId, figureString, selectedBadges, etc.)
+    S.user.data = await apiFetch(`/api/users/${encodeURIComponent(q)}`);
+  } catch(e) { S.user.err = e.message; }
   S.user.loading = false; render();
 }
 
-async function loadUserBadges() {
-  const name = S.user.profile?.name || S.user.profile?.habboName || S.user.q;
-  if (!name) { S.user.badges = []; return; }
+async function loadFriends() {
+  const uid = S.user.data?.uniqueId;
+  if (!uid) { S.user.friends = []; render(); return; }
   try {
-    // Los badges vienen dentro del perfil en Habbo
-    const data = await api(`/api/users/${encodeURIComponent(name)}/profile`);
-    S.user.badges = data.selectedBadges || data.badges || [];
-  } catch { S.user.badges = []; }
-  render();
-}
-
-async function loadUserFriends() {
-  const name = S.user.profile?.name || S.user.profile?.habboName || S.user.q;
-  if (!name) { S.user.friends = []; return; }
-  try {
-    const data = await api(`/api/users/${encodeURIComponent(name)}/friends`);
-    S.user.friends = Array.isArray(data) ? data : (data.friends || []);
+    const d = await apiFetch(`/api/users/${encodeURIComponent(uid)}/friends`);
+    S.user.friends = Array.isArray(d) ? d : [];
   } catch { S.user.friends = []; }
   render();
 }
 
-function setUserSub(sub) { S.user.sub = sub; render(); }
-function loadFriendProfile(name) {
-  S.user.q = name; Object.assign(S.user, { profile:null, badges:null, friends:null, sub:'info' });
-  searchUser();
-}
+function setSub(s) { S.user.sub=s; render(); }
+function loadFriend(name) { S.user.q=name; Object.assign(S.user,{data:null,friends:null,sub:'info'}); searchUser(); }
 
 function prefillFuna(name) {
-  S.funas.formOpen = true; S.funas.formTarget = name;
+  S.funas.formOpen=true; S.funas.formTarget=name;
   setTab('funas');
-  setTimeout(() => document.getElementById('fContent')?.focus(), 100);
+  setTimeout(()=>document.querySelector('.funa-form-body textarea')?.focus(), 100);
 }
 
-// ─── LIGHTBOX ─────────────────────────────────
-function openLightbox(src) {
-  document.getElementById('lightboxImg').src = src;
+// ═══════════════════════════════════════════════════════
+// LIGHTBOX
+// ═══════════════════════════════════════════════════════
+function openLB(src) {
+  document.getElementById('lbImg').src = src;
   document.getElementById('lightbox').style.display = 'flex';
   document.body.style.overflow = 'hidden';
 }
-function closeLightbox() {
+function closeLB() {
   document.getElementById('lightbox').style.display = 'none';
   document.body.style.overflow = '';
 }
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
+document.addEventListener('keydown', e => { if (e.key==='Escape') closeLB(); });
 
-// ─── UTILS ────────────────────────────────────
+// ═══════════════════════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════════════════════
 function esc(s) {
-  return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  return String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 function timeAgo(ts) {
-  const m = Math.floor((Date.now() - ts) / 60000);
-  if (m < 1) return 'ahora';
-  if (m < 60) return `hace ${m}m`;
-  const h = Math.floor(m / 60);
-  if (h < 24) return `hace ${h}h`;
-  const d = Math.floor(h / 24);
-  if (d < 30) return `hace ${d}d`;
-  return new Date(ts).toLocaleDateString('es-ES', { day:'numeric', month:'short' });
+  const m = Math.floor((Date.now()-ts)/60000);
+  if (m<1)  return 'ahora mismo';
+  if (m<60) return `hace ${m}m`;
+  const h = Math.floor(m/60);
+  if (h<24) return `hace ${h}h`;
+  const d = Math.floor(h/24);
+  if (d<30) return `hace ${d}d`;
+  return new Date(ts).toLocaleDateString('es-ES',{day:'numeric',month:'short'});
 }
 
-// ─── INIT ─────────────────────────────────────
+// ═══════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════
 render();
 checkHealth();
-loadHomeStats();
+loadStats();
 </script>
 </body>
 </html>

@@ -1,10 +1,7 @@
 'use strict';
 /**
- * HabboTracker API — by Fungi 🍄 (v6)
- * - Sin login/auth
- * - Funas anónimas por defecto
- * - Persistencia en Turso (SQLite remoto)
- * - Rate limiting por IP
+ * HabboTracker API — by Fungi 🍄 (v6.1)
+ * Fix: user lookup ahora usa uniqueId para profile/friends
  */
 
 const http   = require('http');
@@ -14,7 +11,6 @@ const path   = require('path');
 const url    = require('url');
 const crypto = require('crypto');
 
-// ─── Config ───────────────────────────────────────────────────────────────────
 const PORT            = parseInt(process.env.PORT || '3001', 10);
 const FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN || '*';
 const TURSO_URL       = process.env.TURSO_URL;
@@ -29,11 +25,10 @@ const ALLOWED_IMG     = new Set(['image/jpeg','image/jpg','image/png','image/gif
 const FUNAS_PER_PAGE  = 20;
 const FUNAS_PER_HOUR  = 5;
 
-// ─── Dirs ─────────────────────────────────────────────────────────────────────
 for (const d of [DATA_DIR, UPLOADS_DIR])
   if (!fs.existsSync(d)) fs.mkdirSync(d, { recursive: true });
 
-// ─── Turso HTTP client ────────────────────────────────────────────────────────
+// ─── Turso ────────────────────────────────────────────────────────────────────
 function sqlArg(v) {
   if (v === null || v === undefined) return { type: 'null' };
   if (typeof v === 'number') return Number.isInteger(v) ? { type: 'integer', value: String(v) } : { type: 'float', value: v };
@@ -41,8 +36,7 @@ function sqlArg(v) {
 }
 
 async function turso(statements) {
-  if (!TURSO_URL || !TURSO_TOKEN) throw new Error('TURSO_URL y TURSO_TOKEN no configurados');
-
+  if (!TURSO_URL || !TURSO_TOKEN) throw new Error('Turso no configurado');
   const body = JSON.stringify({
     requests: statements.map(s =>
       typeof s === 'string'
@@ -50,21 +44,13 @@ async function turso(statements) {
         : { type: 'execute', stmt: { sql: s.sql, args: (s.args || []).map(sqlArg) } }
     ).concat([{ type: 'close' }])
   });
-
   return new Promise((resolve, reject) => {
     const u = new url.URL('/v2/pipeline', TURSO_URL);
-    const opts = {
-      hostname: u.hostname,
-      path:     u.pathname,
-      method:   'POST',
-      headers: {
-        'Authorization':  `Bearer ${TURSO_TOKEN}`,
-        'Content-Type':   'application/json',
-        'Content-Length': Buffer.byteLength(body),
-      },
+    const req = https.request({
+      hostname: u.hostname, path: u.pathname, method: 'POST',
+      headers: { 'Authorization': `Bearer ${TURSO_TOKEN}`, 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(body) },
       timeout: 10_000,
-    };
-    const req = https.request(opts, res => {
+    }, res => {
       const chunks = [];
       res.on('data', c => chunks.push(c));
       res.on('end', () => {
@@ -77,8 +63,7 @@ async function turso(statements) {
     });
     req.on('timeout', () => { req.destroy(); reject(new Error('Turso timeout')); });
     req.on('error', reject);
-    req.write(body);
-    req.end();
+    req.write(body); req.end();
   });
 }
 
@@ -98,24 +83,15 @@ async function exec(sql, args = []) {
   return r.response?.result;
 }
 
-// ─── Init DB ──────────────────────────────────────────────────────────────────
 async function initDB() {
   await turso([
     { sql: `CREATE TABLE IF NOT EXISTS funas (
-        id         TEXT PRIMARY KEY,
-        habbo_name TEXT,
-        target     TEXT,
-        content    TEXT NOT NULL,
-        image_url  TEXT,
-        ip_hash    TEXT,
-        votes_si   INTEGER DEFAULT 0,
-        votes_no   INTEGER DEFAULT 0,
-        created_at INTEGER NOT NULL
+        id TEXT PRIMARY KEY, habbo_name TEXT, target TEXT,
+        content TEXT NOT NULL, image_url TEXT, ip_hash TEXT,
+        votes_si INTEGER DEFAULT 0, votes_no INTEGER DEFAULT 0, created_at INTEGER NOT NULL
       )` },
     { sql: `CREATE TABLE IF NOT EXISTS votes (
-        funa_id  TEXT NOT NULL,
-        ip_hash  TEXT NOT NULL,
-        vote     TEXT NOT NULL,
+        funa_id TEXT NOT NULL, ip_hash TEXT NOT NULL, vote TEXT NOT NULL,
         PRIMARY KEY (funa_id, ip_hash)
       )` },
   ]);
@@ -136,7 +112,7 @@ setInterval(() => { const now = Date.now(); for (const [k,v] of rlMap) if (now >
 
 async function canPostFuna(ipHash) {
   const oneHourAgo = Date.now() - 3_600_000;
-  const rows = await query('SELECT COUNT(*) as cnt FROM funas WHERE ip_hash = ? AND created_at > ?', [ipHash, oneHourAgo]);
+  const rows = await query('SELECT COUNT(*) as cnt FROM funas WHERE ip_hash=? AND created_at>?', [ipHash, oneHourAgo]);
   return parseInt(rows[0]?.cnt || 0) < FUNAS_PER_HOUR;
 }
 
@@ -150,7 +126,6 @@ function setCORS(res) {
   res.setHeader('Access-Control-Allow-Methods', 'GET,POST,DELETE,OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   res.setHeader('Access-Control-Max-Age',       '86400');
-  res.setHeader('X-Content-Type-Options',       'nosniff');
 }
 
 function ok(res, status, data) {
@@ -163,8 +138,8 @@ function ok(res, status, data) {
 function readRaw(req) {
   return new Promise((resolve, reject) => {
     const parts = []; let total = 0;
-    req.on('data', c => { total += c.length; if (total > MAX_BODY_BYTES) return reject(new Error('Payload demasiado grande')); parts.push(c); });
-    req.on('end',   () => resolve(Buffer.concat(parts)));
+    req.on('data', c => { total += c.length; if (total > MAX_BODY_BYTES) return reject(new Error('Payload muy grande')); parts.push(c); });
+    req.on('end',  () => resolve(Buffer.concat(parts)));
     req.on('error', reject);
   });
 }
@@ -177,7 +152,6 @@ async function readJSON(req) {
 
 const san = (s, max) => String(s ?? '').trim().slice(0, max).replace(/[<>]/g, '');
 
-// ─── Multipart ────────────────────────────────────────────────────────────────
 function parseMultipart(buf, boundary) {
   const fields = {}; let file = null;
   let pos = buf.indexOf('--' + boundary);
@@ -186,23 +160,16 @@ function parseMultipart(buf, boundary) {
     if (buf[after] === 45 && buf[after+1] === 45) break;
     const he = buf.indexOf('\r\n\r\n', after);
     if (he === -1) break;
-    const headers   = buf.slice(after + 2, he).toString('utf8');
+    const headers = buf.slice(after + 2, he).toString('utf8');
     const bodyStart = he + 4;
     const nextBound = buf.indexOf('\r\n--' + boundary, bodyStart);
-    const body      = buf.slice(bodyStart, nextBound !== -1 ? nextBound : buf.length);
+    const body = buf.slice(bodyStart, nextBound !== -1 ? nextBound : buf.length);
     const nameM = headers.match(/name="([^"]+)"/i);
     const fileM = headers.match(/filename="([^"]*)"/i);
     const typeM = headers.match(/Content-Type:\s*([^\r\n]+)/i);
     if (nameM) {
-      if (fileM) {
-        file = {
-          filename: path.basename(fileM[1] || 'upload'),
-          mimetype: (typeM ? typeM[1].trim() : 'application/octet-stream').toLowerCase(),
-          data: body,
-        };
-      } else {
-        fields[nameM[1]] = body.toString('utf8').trim();
-      }
+      if (fileM) file = { filename: path.basename(fileM[1]||'upload'), mimetype: (typeM?typeM[1].trim():'application/octet-stream').toLowerCase(), data: body };
+      else fields[nameM[1]] = body.toString('utf8').trim();
     }
     pos = nextBound !== -1 ? nextBound + 2 : -1;
   }
@@ -214,11 +181,7 @@ function habboFetch(p) {
   return new Promise((resolve, reject) => {
     const r = https.request({
       hostname: HABBO_HOST, path: p, method: 'GET',
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (compatible; HabboTracker/6.0)',
-        'Accept': 'application/json,image/*,*/*',
-        'Accept-Language': 'es-ES,es;q=0.9',
-      },
+      headers: { 'User-Agent': 'Mozilla/5.0 (compatible; HabboTracker/6.1)', 'Accept': 'application/json,image/*,*/*', 'Accept-Language': 'es-ES,es;q=0.9' },
       timeout: HABBO_TIMEOUT,
     }, res => {
       const chunks = [];
@@ -234,11 +197,9 @@ function habboFetch(p) {
 async function proxyJSON(res, p) {
   try {
     const { status, body } = await habboFetch(p);
-    if (status < 200 || status >= 300) return ok(res, status, { error: `habbo.es devolvió ${status}` });
+    if (status < 200 || status >= 300) return ok(res, status, { error: `Habbo devolvió ${status}` });
     ok(res, 200, JSON.parse(body.toString('utf8')));
-  } catch (e) {
-    ok(res, e.message === 'Timeout' ? 504 : 502, { error: e.message });
-  }
+  } catch (e) { ok(res, e.message === 'Timeout' ? 504 : 502, { error: e.message }); }
 }
 
 async function proxyImg(res, p, cacheSeconds = 3600) {
@@ -246,13 +207,35 @@ async function proxyImg(res, p, cacheSeconds = 3600) {
     const { status, headers, body } = await habboFetch(p);
     if (status < 200 || status >= 300) { res.writeHead(status); res.end(); return; }
     setCORS(res);
-    res.writeHead(200, {
-      'Content-Type':   headers['content-type'] || 'image/gif',
-      'Cache-Control':  `public, max-age=${cacheSeconds}`,
-      'Content-Length': body.length,
-    });
+    res.writeHead(200, { 'Content-Type': headers['content-type'] || 'image/gif', 'Cache-Control': `public, max-age=${cacheSeconds}`, 'Content-Length': body.length });
     res.end(body);
   } catch { res.writeHead(502); res.end(); }
+}
+
+// ─── /api/users/:name — lookup completo ───────────────────────────────────────
+// Habbo API flow:
+//   1. GET /api/public/users?name=X  → {uniqueId, name, figureString, selectedBadges, ...}
+//   2. GET /api/public/users/{uniqueId}/friends → array de amigos
+// El "profile" completo ya viene en el paso 1, no hay endpoint /profile separado por nombre
+async function handleUserLookup(res, name) {
+  try {
+    const { status, body } = await habboFetch(`/api/public/users?name=${encodeURIComponent(name)}`);
+    if (status === 404) return ok(res, 404, { error: 'Usuario no encontrado en Habbo.es' });
+    if (status !== 200) return ok(res, status, { error: `Habbo devolvió ${status}` });
+    const user = JSON.parse(body.toString('utf8'));
+    if (user.error) return ok(res, 404, { error: 'Usuario no encontrado' });
+    ok(res, 200, user);
+  } catch (e) { ok(res, 502, { error: e.message }); }
+}
+
+async function handleUserFriends(res, uniqueId) {
+  try {
+    const { status, body } = await habboFetch(`/api/public/users/${encodeURIComponent(uniqueId)}/friends`);
+    if (status === 404) return ok(res, 200, []); // perfil privado → amigos no disponibles
+    if (status !== 200) return ok(res, status, { error: `Habbo devolvió ${status}` });
+    const data = JSON.parse(body.toString('utf8'));
+    ok(res, 200, Array.isArray(data) ? data : []);
+  } catch (e) { ok(res, 502, { error: e.message }); }
 }
 
 // ─── Funas ────────────────────────────────────────────────────────────────────
@@ -261,7 +244,7 @@ async function handleGetFunas(res, q, ipHash) {
   const offset = (page - 1) * FUNAS_PER_PAGE;
   const target = q.target ? san(q.target, 60) : null;
   const sort   = q.sort === 'top' ? 'votes_si DESC, created_at DESC' : 'created_at DESC';
-  const where  = target ? 'WHERE lower(target) = lower(?)' : '';
+  const where  = target ? 'WHERE lower(target)=lower(?)' : '';
   const args   = target ? [target] : [];
 
   const [countRows, funas] = await Promise.all([
@@ -272,7 +255,7 @@ async function handleGetFunas(res, q, ipHash) {
   const total = parseInt(countRows[0]?.cnt || 0);
   const funaIds = funas.map(f => f.id);
   let myVotes = {};
-  if (funaIds.length > 0 && ipHash) {
+  if (funaIds.length && ipHash) {
     const ph = funaIds.map(() => '?').join(',');
     const voteRows = await query(`SELECT funa_id,vote FROM votes WHERE ip_hash=? AND funa_id IN (${ph})`, [ipHash, ...funaIds]);
     for (const v of voteRows) myVotes[v.funa_id] = v.vote;
@@ -280,25 +263,18 @@ async function handleGetFunas(res, q, ipHash) {
 
   ok(res, 200, {
     items: funas.map(f => ({
-      id:        f.id,
-      habboName: f.habbo_name || null,
-      target:    f.target     || null,
-      content:   f.content,
-      imageUrl:  f.image_url  || null,
-      votesSi:   parseInt(f.votes_si || 0),
-      votesNo:   parseInt(f.votes_no || 0),
-      myVote:    myVotes[f.id] || null,
-      createdAt: parseInt(f.created_at),
+      id: f.id, habboName: f.habbo_name || null, target: f.target || null,
+      content: f.content, imageUrl: f.image_url || null,
+      votesSi: parseInt(f.votes_si||0), votesNo: parseInt(f.votes_no||0),
+      myVote: myVotes[f.id] || null, createdAt: parseInt(f.created_at),
     })),
-    total,
-    page,
-    pages: Math.max(1, Math.ceil(total / FUNAS_PER_PAGE)),
+    total, page, pages: Math.max(1, Math.ceil(total / FUNAS_PER_PAGE)),
   });
 }
 
 async function handleCreateFuna(req, res, ip) {
   const ipHash = hashIP(ip);
-  const ct     = req.headers['content-type'] || '';
+  const ct = req.headers['content-type'] || '';
   let fields = {}, imageFile = null;
 
   if (ct.includes('multipart/form-data')) {
@@ -315,77 +291,68 @@ async function handleCreateFuna(req, res, ip) {
   const target    = san(fields.target    || '', 60);
   const habboName = san(fields.habboName || '', 60);
 
-  if (content.length < 5)   return ok(res, 400, { error: 'El contenido debe tener al menos 5 caracteres' });
-  if (content.length > 500) return ok(res, 400, { error: 'Máximo 500 caracteres' });
-
-  const canPost = await canPostFuna(ipHash);
-  if (!canPost) return ok(res, 429, { error: `Máximo ${FUNAS_PER_HOUR} funas por hora. Vuelve más tarde.` });
+  if (content.length < 5)   return ok(res, 400, { error: 'Mínimo 5 caracteres' });
+  if (!await canPostFuna(ipHash)) return ok(res, 429, { error: `Máximo ${FUNAS_PER_HOUR} funas por hora` });
 
   let imageUrl = null;
-  if (imageFile && imageFile.data.length > 0) {
-    if (!ALLOWED_IMG.has(imageFile.mimetype)) return ok(res, 400, { error: 'Formato no permitido. Usa JPG, PNG, GIF o WEBP' });
+  if (imageFile?.data.length > 0) {
+    if (!ALLOWED_IMG.has(imageFile.mimetype)) return ok(res, 400, { error: 'Formato no permitido' });
     if (imageFile.data.length > MAX_IMG_BYTES) return ok(res, 413, { error: 'Imagen demasiado grande (máx 5 MB)' });
-    const extMap = { 'image/gif':'.gif','image/png':'.png','image/webp':'.webp','image/jpeg':'.jpg','image/jpg':'.jpg' };
-    const ext    = extMap[imageFile.mimetype] || '.jpg';
-    const fname  = crypto.randomBytes(16).toString('hex') + ext;
+    const ext = { 'image/gif':'.gif','image/png':'.png','image/webp':'.webp','image/jpeg':'.jpg','image/jpg':'.jpg' }[imageFile.mimetype] || '.jpg';
+    const fname = crypto.randomBytes(16).toString('hex') + ext;
     fs.writeFileSync(path.join(UPLOADS_DIR, fname), imageFile.data);
     imageUrl = `/uploads/${fname}`;
   }
 
-  const id  = crypto.randomBytes(8).toString('hex');
+  const id = crypto.randomBytes(8).toString('hex');
   const now = Date.now();
   await exec('INSERT INTO funas (id,habbo_name,target,content,image_url,ip_hash,votes_si,votes_no,created_at) VALUES (?,?,?,?,?,?,0,0,?)',
-    [id, habboName || null, target || null, content, imageUrl, ipHash, now]);
-
-  ok(res, 201, { id, habboName: habboName || null, target: target || null, content, imageUrl, votesSi: 0, votesNo: 0, myVote: null, createdAt: now });
+    [id, habboName||null, target||null, content, imageUrl, ipHash, now]);
+  ok(res, 201, { id, habboName: habboName||null, target: target||null, content, imageUrl, votesSi:0, votesNo:0, myVote:null, createdAt: now });
 }
 
 async function handleVote(req, res, funaId, ip) {
   const ipHash = hashIP(ip);
   let body; try { body = await readJSON(req); } catch (e) { return ok(res, 400, { error: e.message }); }
   const vote = body.vote;
-  if (!['si', 'no'].includes(vote)) return ok(res, 400, { error: 'Voto inválido' });
+  if (!['si','no'].includes(vote)) return ok(res, 400, { error: 'Voto inválido' });
 
   const rows = await query('SELECT id,votes_si,votes_no FROM funas WHERE id=?', [funaId]);
   if (!rows.length) return ok(res, 404, { error: 'Funa no encontrada' });
 
-  const funa     = rows[0];
+  const funa = rows[0];
   const existing = await query('SELECT vote FROM votes WHERE funa_id=? AND ip_hash=?', [funaId, ipHash]);
-  let votesSi = parseInt(funa.votes_si || 0);
-  let votesNo = parseInt(funa.votes_no || 0);
-  let myVote  = null;
+  let si = parseInt(funa.votes_si||0), no = parseInt(funa.votes_no||0), myVote = null;
 
   if (existing.length > 0) {
     const prev = existing[0].vote;
     if (prev === vote) {
       await exec('DELETE FROM votes WHERE funa_id=? AND ip_hash=?', [funaId, ipHash]);
-      if (vote === 'si') votesSi = Math.max(0, votesSi - 1);
-      else               votesNo = Math.max(0, votesNo - 1);
+      if (vote==='si') si=Math.max(0,si-1); else no=Math.max(0,no-1);
     } else {
       await exec('UPDATE votes SET vote=? WHERE funa_id=? AND ip_hash=?', [vote, funaId, ipHash]);
-      if (vote === 'si') { votesSi++; votesNo = Math.max(0, votesNo - 1); }
-      else               { votesNo++; votesSi = Math.max(0, votesSi - 1); }
+      if (vote==='si') { si++; no=Math.max(0,no-1); } else { no++; si=Math.max(0,si-1); }
       myVote = vote;
     }
   } else {
     await exec('INSERT INTO votes (funa_id,ip_hash,vote) VALUES (?,?,?)', [funaId, ipHash, vote]);
-    if (vote === 'si') votesSi++; else votesNo++;
+    if (vote==='si') si++; else no++;
     myVote = vote;
   }
 
-  await exec('UPDATE funas SET votes_si=?,votes_no=? WHERE id=?', [votesSi, votesNo, funaId]);
-  ok(res, 200, { votesSi, votesNo, myVote });
+  await exec('UPDATE funas SET votes_si=?,votes_no=? WHERE id=?', [si, no, funaId]);
+  ok(res, 200, { votesSi: si, votesNo: no, myVote });
 }
 
 async function handleStats(res) {
   const [totals, top] = await Promise.all([
-    query('SELECT COUNT(*) as total, COUNT(CASE WHEN habbo_name IS NOT NULL AND habbo_name != "" THEN 1 END) as con_nombre, COUNT(CASE WHEN image_url IS NOT NULL THEN 1 END) as con_img FROM funas'),
-    query('SELECT target, COUNT(*) as cnt FROM funas WHERE target IS NOT NULL AND target != "" GROUP BY lower(target) ORDER BY cnt DESC LIMIT 10'),
+    query('SELECT COUNT(*) as total, COUNT(CASE WHEN habbo_name IS NOT NULL AND habbo_name!="" THEN 1 END) as con_nombre, COUNT(CASE WHEN image_url IS NOT NULL THEN 1 END) as con_img FROM funas'),
+    query('SELECT target, COUNT(*) as cnt FROM funas WHERE target IS NOT NULL AND target!="" GROUP BY lower(target) ORDER BY cnt DESC LIMIT 10'),
   ]);
   ok(res, 200, {
-    totalFunas: parseInt(totals[0]?.total      || 0),
-    conNombre:  parseInt(totals[0]?.con_nombre || 0),
-    conImagen:  parseInt(totals[0]?.con_img    || 0),
+    totalFunas: parseInt(totals[0]?.total||0),
+    conNombre:  parseInt(totals[0]?.con_nombre||0),
+    conImagen:  parseInt(totals[0]?.con_img||0),
     topFunados: top.map(r => ({ name: r.target, count: parseInt(r.cnt) })),
   });
 }
@@ -405,14 +372,13 @@ http.createServer(async (req, res) => {
 
   try {
     if (pn === '/health' && method === 'GET') {
-      const rows = await query('SELECT COUNT(*) as cnt FROM funas').catch(() => [{ cnt: 0 }]);
-      return ok(res, 200, { status: 'ok', funas: parseInt(rows[0]?.cnt || 0), db: 'turso' });
+      const rows = await query('SELECT COUNT(*) as cnt FROM funas').catch(() => [{ cnt:0 }]);
+      return ok(res, 200, { status:'ok', funas: parseInt(rows[0]?.cnt||0), db:'turso', v:'6.1' });
     }
 
-    // Funas
     if (pn === '/funas/stats' && method === 'GET') return await handleStats(res);
-    if (pn === '/funas' && method === 'GET')        return await handleGetFunas(res, q, hashIP(ip));
-    if (pn === '/funas' && method === 'POST')       return await handleCreateFuna(req, res, ip);
+    if (pn === '/funas'       && method === 'GET')  return await handleGetFunas(res, q, hashIP(ip));
+    if (pn === '/funas'       && method === 'POST') return await handleCreateFuna(req, res, ip);
 
     let m;
     if ((m = pn.match(/^\/funas\/([a-f0-9]{1,32})\/vote$/)) && method === 'POST')
@@ -423,7 +389,7 @@ http.createServer(async (req, res) => {
       const fname = path.basename(pn);
       const fpath = path.join(UPLOADS_DIR, fname);
       if (!fs.existsSync(fpath)) { res.writeHead(404); res.end(); return; }
-      const ct = { '.jpg':'image/jpeg','.jpeg':'image/jpeg','.png':'image/png','.gif':'image/gif','.webp':'image/webp' }[path.extname(fname).toLowerCase()] || 'application/octet-stream';
+      const ct = {'.jpg':'image/jpeg','.jpeg':'image/jpeg','.png':'image/png','.gif':'image/gif','.webp':'image/webp'}[path.extname(fname).toLowerCase()] || 'application/octet-stream';
       setCORS(res);
       res.writeHead(200, { 'Content-Type': ct, 'Cache-Control': 'public, max-age=86400' });
       fs.createReadStream(fpath).pipe(res);
@@ -432,26 +398,26 @@ http.createServer(async (req, res) => {
 
     if (method !== 'GET') return ok(res, 405, { error: 'Método no permitido' });
 
-    // Habbo API proxy
-    if (pn === '/api/users' && q.name)
-      return proxyJSON(res, `/api/public/users?name=${encodeURIComponent(q.name)}`);
-    if ((m = pn.match(/^\/api\/users\/([^/]{1,50})\/profile$/)))
-      return proxyJSON(res, `/api/public/users/${encodeURIComponent(m[1])}/profile`);
-    if ((m = pn.match(/^\/api\/users\/([^/]{1,50})\/friends$/)))
-      return proxyJSON(res, `/api/public/users/${encodeURIComponent(m[1])}/friends`);
+    // Usuario: lookup por nombre → devuelve datos completos incluyendo uniqueId y selectedBadges
+    if ((m = pn.match(/^\/api\/users\/([^/]{1,60})$/)) && method === 'GET')
+      return await handleUserLookup(res, m[1]);
+
+    // Amigos: por uniqueId (que el frontend obtiene del lookup)
+    if ((m = pn.match(/^\/api\/users\/([^/]{1,80})\/friends$/)))
+      return await handleUserFriends(res, m[1]);
 
     // Avatar proxy
     if (pn === '/avatar' && q.figure)
       return proxyImg(res, `/habbo-imaging/avatarimage?figure=${encodeURIComponent(q.figure)}&size=${q.size||'l'}&gesture=sml&head_direction=3&direction=3`, 3600);
 
-    // Badge proxy — corregido
+    // Badge proxy
     if ((m = pn.match(/^\/badge\/([a-zA-Z0-9_-]{1,30})$/))) {
       const code = m[1];
       try {
         const { status, headers, body } = await habboFetch(`/habbo-imaging/badge/${code}.gif`);
         if (status === 200) {
           setCORS(res);
-          res.writeHead(200, { 'Content-Type': headers['content-type'] || 'image/gif', 'Cache-Control': 'public, max-age=86400', 'Content-Length': body.length });
+          res.writeHead(200, { 'Content-Type': headers['content-type']||'image/gif', 'Cache-Control': 'public, max-age=86400', 'Content-Length': body.length });
           return res.end(body);
         }
       } catch {}
@@ -459,19 +425,15 @@ http.createServer(async (req, res) => {
     }
 
     ok(res, 404, { error: 'Ruta no encontrada' });
-
   } catch (e) {
     console.error('Error:', e.message);
-    ok(res, 500, { error: 'Error interno del servidor' });
+    ok(res, 500, { error: 'Error interno' });
   }
 
 }).listen(PORT, '0.0.0.0', async () => {
-  console.log(`\n  🍄  HabboTracker API v6 — by Fungi`);
+  console.log(`\n  🍄  HabboTracker API v6.1 — by Fungi`);
   console.log(`  Puerto: ${PORT} | CORS: ${FRONTEND_ORIGIN}`);
-  if (!TURSO_URL || !TURSO_TOKEN) {
-    console.warn('  ⚠️  TURSO_URL / TURSO_TOKEN no configurados');
-  } else {
-    try { await initDB(); } catch (e) { console.error('  ✗ Error Turso:', e.message); }
-  }
+  if (!TURSO_URL || !TURSO_TOKEN) console.warn('  ⚠️  Turso no configurado');
+  else try { await initDB(); } catch (e) { console.error('  ✗ Turso:', e.message); }
   console.log('');
 });
