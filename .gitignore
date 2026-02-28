@@ -1,0 +1,5 @@
+backend/node_modules/
+backend/data/
+backend/.env
+*.tmp
+.DS_Store
