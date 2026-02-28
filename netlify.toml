@@ -1,0 +1,12 @@
+# Netlify — HabboTracker Frontend
+# El backend va separado en Render.com
+
+[build]
+  publish = "frontend"
+  # No hay build step — es HTML puro
+
+# SPA: todas las rutas sirven index.html
+[[redirects]]
+  from   = "/*"
+  to     = "/index.html"
+  status = 200
